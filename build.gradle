@@ -53,18 +53,18 @@ bootJar {
 }
 
 frontend {
-    nodeDistributionProvided = true
-//    nodeVersion = '14.15.4'
+    nodeDistributionProvided = false
+    nodeVersion = '14.15.4'
 //    nodeDistributionUrlRoot = 'https://nodejs.org/dist/'
 //    nodeDistributionUrlPathPattern = "v${nodeVersion}/node-v${nodeVersion}-ARCH.TYPE"
-//    nodeInstallDirectory = file("${projectDir}/build/node")
+    nodeInstallDirectory = file("${projectDir}/build/node")
 
     yarnEnabled = true
-    yarnDistributionProvided = true
-//    yarnVersion = '1.22.10'
+    yarnDistributionProvided = false
+    yarnVersion = '1.22.10'
 //    yarnDistributionUrlRoot = 'https://github.com/yarnpkg/yarn/releases/download/'
 //    yarnDistributionUrlPathPattern = 'vVERSION/yarn-vVERSION.tar.gz'
-//    yarnInstallDirectory = file("${projectDir}/build/yarn")
+    yarnInstallDirectory = file("${projectDir}/build/yarn")
 
     installScript = 'install'
     assembleScript = 'build'
