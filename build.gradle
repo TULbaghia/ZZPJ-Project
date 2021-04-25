@@ -1,0 +1,84 @@
+plugins {
+    id 'org.springframework.boot' version '2.5.0-RC1'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'java'
+    id 'org.siouan.frontend-jdk11' version '5.0.1'
+}
+
+group = 'pl.lodz.p.it'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '16'
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven { url 'https://repo.spring.io/milestone' }
+}
+
+ext {
+    set('testcontainersVersion', "1.15.3")
+}
+
+dependencies {
+//    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-jersey'
+//    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    compileOnly 'org.projectlombok:lombok'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+//    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.testcontainers:junit-jupiter'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.testcontainers:testcontainers-bom:${testcontainersVersion}"
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+bootJar {
+    archiveFileName = 'app.jar'
+}
+
+frontend {
+    nodeDistributionProvided = true
+//    nodeVersion = '14.15.4'
+//    nodeDistributionUrlRoot = 'https://nodejs.org/dist/'
+//    nodeDistributionUrlPathPattern = "v${nodeVersion}/node-v${nodeVersion}-ARCH.TYPE"
+//    nodeInstallDirectory = file("${projectDir}/build/node")
+
+    yarnEnabled = true
+    yarnDistributionProvided = true
+//    yarnVersion = '1.22.10'
+//    yarnDistributionUrlRoot = 'https://github.com/yarnpkg/yarn/releases/download/'
+//    yarnDistributionUrlPathPattern = 'vVERSION/yarn-vVERSION.tar.gz'
+//    yarnInstallDirectory = file("${projectDir}/build/yarn")
+
+    installScript = 'install'
+    assembleScript = 'build'
+
+    packageJsonDirectory = file("${projectDir}/src/main/frontend/")
+    verboseModeEnabled = false
+}
+
+task copyReactBuild(type: Copy) {
+    from "src/main/frontend/build"
+    into "build/resources/main/static"
+//    into ("./build/resources/main/static") {
+//        from "./src/main/frontend/build"
+//    }
+}
+
+assembleFrontend.finalizedBy copyReactBuild
