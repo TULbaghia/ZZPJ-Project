@@ -8,7 +8,6 @@ import pl.lodz.p.it.zzpj.entities.enums.AccessLevel;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class AdminRoleDto extends RoleDto {
     public AdminRoleDto(Long id, AccessLevel accessLevel, boolean enabled) {
