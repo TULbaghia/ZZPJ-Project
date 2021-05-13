@@ -12,17 +12,24 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import pl.lodz.p.it.zzpj.jwt.JwtConfig;
 import pl.lodz.p.it.zzpj.jwt.JwtTokenVerifier;
 import pl.lodz.p.it.zzpj.jwt.JwtUsernameAndPasswordAuthenticationFilter;
 import pl.lodz.p.it.zzpj.users.UserService;
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-@Configuration
+import javax.crypto.SecretKey;
+
 @AllArgsConstructor
+@Configuration
 @EnableWebSecurity
+@EnableSwagger2
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final UserService userService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final JwtConfig jwtConfig;
+    private final SecretKey secretKey;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -32,10 +39,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/api/v*/registration/**").permitAll()
+                .antMatchers("/api/ping").hasAuthority("USER")
                 .anyRequest().authenticated()
                 .and()
-                .addFilter(new JwtUsernameAndPasswordAuthenticationFilter(authenticationManager()))
-                .addFilterAfter(new JwtTokenVerifier(), JwtUsernameAndPasswordAuthenticationFilter.class)
+                .addFilter(new JwtUsernameAndPasswordAuthenticationFilter(authenticationManager(), jwtConfig, secretKey))
+                .addFilterAfter(new JwtTokenVerifier(jwtConfig, secretKey), JwtUsernameAndPasswordAuthenticationFilter.class)
                 .exceptionHandling()
                 .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
     }

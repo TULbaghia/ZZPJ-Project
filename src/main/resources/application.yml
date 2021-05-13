@@ -35,3 +35,7 @@ spring:
           connectiontimeout: 5000
           timeout: 3000
           writetimeout: 5000
+
+application.jwt.secretKey: exampleexampleexampleexampleexampleexampleexampleexampleexampleexample
+application.jwt.tokenPrefix: Bearer
+application.jwt.tokenExpiration: 900000
