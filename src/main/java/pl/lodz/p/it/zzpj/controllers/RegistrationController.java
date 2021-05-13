@@ -1,7 +1,9 @@
-package pl.lodz.p.it.zzpj.registration;
+package pl.lodz.p.it.zzpj.controllers;
 
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import pl.lodz.p.it.zzpj.dtos.RegistrationRequest;
+import pl.lodz.p.it.zzpj.managers.RegistrationService;
 
 @RestController
 @RequestMapping(path = "api/v1/registration")

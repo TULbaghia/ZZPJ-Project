@@ -1,7 +1,9 @@
-package pl.lodz.p.it.zzpj.registration.token;
+package pl.lodz.p.it.zzpj.managers;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import pl.lodz.p.it.zzpj.entities.token.ConfirmationToken;
+import pl.lodz.p.it.zzpj.repositories.ConfirmationTokenRepository;
 
 import java.time.LocalDateTime;
 import java.util.Optional;

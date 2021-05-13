@@ -1,4 +1,4 @@
-package pl.lodz.p.it.zzpj.users;
+package pl.lodz.p.it.zzpj.entities.user;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

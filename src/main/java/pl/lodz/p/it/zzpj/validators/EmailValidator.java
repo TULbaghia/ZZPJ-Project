@@ -1,4 +1,4 @@
-package pl.lodz.p.it.zzpj.registration;
+package pl.lodz.p.it.zzpj.validators;
 
 import org.springframework.stereotype.Service;
 
