@@ -11,6 +11,7 @@ import pl.lodz.p.it.zzpj.entities.token.ConfirmationToken;
 import pl.lodz.p.it.zzpj.repositories.AccountRepository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -26,6 +27,10 @@ public class AccountService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         return accountRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException(String.format(USER_NOT_FOUND_MSG, email)));
+    }
+
+    public List<Account> getAllAccounts() {
+        return accountRepository.findAll();
     }
 
     public String singUpUser(Account account) {
@@ -47,8 +52,6 @@ public class AccountService implements UserDetailsService {
         ConfirmationToken confirmationToken = new ConfirmationToken(token, LocalDateTime.now(), LocalDateTime.now().plusMinutes(15),
                 account);
         confirmationTokenService.saveConfirmationToken(confirmationToken);
-
-//        TODO: Send email
         return token;
     }
 

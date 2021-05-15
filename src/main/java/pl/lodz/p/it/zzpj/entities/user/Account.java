@@ -7,6 +7,7 @@ import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import pl.lodz.p.it.zzpj.validators.Email;
 import pl.lodz.p.it.zzpj.validators.Password;
 
 import javax.persistence.*;
@@ -33,6 +34,7 @@ public class Account implements UserDetails {
     private Long id;
     private String firstName;
     private String lastName;
+    @Email
     private String email;
     @Password
     private String password;
