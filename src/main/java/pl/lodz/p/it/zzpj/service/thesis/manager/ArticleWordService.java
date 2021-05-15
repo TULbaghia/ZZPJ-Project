@@ -13,6 +13,8 @@ import pl.lodz.p.it.zzpj.service.thesis.repository.ArticleWordRepository;
 import pl.lodz.p.it.zzpj.service.thesis.repository.WordRepository;
 import pl.lodz.p.it.zzpj.service.thesis.utils.ThesisFilter;
 
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -46,4 +48,11 @@ public class ArticleWordService {
         articleWordRepository.saveAllAndFlush(articleWords);
     }
 
+    public Set<ArticleWord> getArticleWordsForArticle(Set<Long> ids) {
+        return articleWordRepository.getArticleWordsForArticle(ids);
+    }
+
+    public Long getOtherArticleWordsForWord(Long wordId, List<Long> articleWordIds) {
+        return articleWordRepository.getOtherArticleWordsForWord(wordId, articleWordIds);
+    }
 }

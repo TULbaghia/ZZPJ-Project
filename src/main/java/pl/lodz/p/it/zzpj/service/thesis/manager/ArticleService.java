@@ -12,6 +12,7 @@ import pl.lodz.p.it.zzpj.entity.thesis.Article;
 import pl.lodz.p.it.zzpj.entity.thesis.Topic;
 import pl.lodz.p.it.zzpj.exception.AppBaseException;
 import pl.lodz.p.it.zzpj.service.thesis.api.NatureApi;
+import pl.lodz.p.it.zzpj.service.thesis.dto.internal.ArticleDto;
 import pl.lodz.p.it.zzpj.service.thesis.mapper.IArticleMapper;
 import pl.lodz.p.it.zzpj.service.thesis.repository.ArticleRepository;
 import pl.lodz.p.it.zzpj.service.thesis.repository.TopicRepository;
@@ -56,16 +57,8 @@ public class ArticleService {
         articleWordService.generateForId(article.getId());
     }
 
-    public void createFromTopic(@Subject String topic, int start, int pagination) throws AppBaseException {
-        var articleDto = natureApi.getByTopic(topic, start, pagination);
-
-        articleDto.forEach(x -> {
-            try {
-                createFromDoi(x);
-            } catch (AppBaseException e) {
-                log.warning(e.getMessage());
-            }
-        });
+    public List<String> createFromTopic(@Subject String topic, int start, int pagination) throws AppBaseException {
+        return natureApi.getByTopic(topic, start, pagination);
     }
 
     public Article getArticle(Long id) {
@@ -79,5 +72,4 @@ public class ArticleService {
     public void delete(Long id) {
         articleRepository.deleteById(id);
     }
-
 }

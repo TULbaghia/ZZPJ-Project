@@ -1,6 +1,10 @@
 package pl.lodz.p.it.zzpj.service.thesis.controller;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.java.Log;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import pl.lodz.p.it.zzpj.exception.AppBaseException;
 import pl.lodz.p.it.zzpj.service.thesis.dto.internal.ArticleDto;
@@ -16,6 +20,8 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(path = "api/article")
 @AllArgsConstructor
+@Transactional(propagation = Propagation.NEVER)
+@Log
 public class ArticleController {
 
     private final ArticleService articleService;
@@ -29,7 +35,14 @@ public class ArticleController {
     @PutMapping(path = "add/{topic}/{start}/{pagination}")
     @ResponseBody
     public void insertByTopic(@PathVariable @Subject String topic, @PathVariable int start, @PathVariable int pagination) throws AppBaseException {
-        articleService.createFromTopic(topic, start, pagination);
+        var articleDtoList = articleService.createFromTopic(topic, start, pagination);
+        articleDtoList.parallelStream().forEach(x -> {
+            try {
+                articleService.createFromDoi(x);
+            } catch (DataIntegrityViolationException | AppBaseException e) {
+                log.warning(e.getMessage());
+            }
+        });
     }
 
     @GetMapping(path = "{id}")

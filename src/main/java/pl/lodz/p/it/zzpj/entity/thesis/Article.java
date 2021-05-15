@@ -39,7 +39,7 @@ public class Article {
     private String doi;
 
     @NonNull
-    @Column(nullable = false, updatable = false)
+    @Column(length = Short.MAX_VALUE, nullable = false, updatable = false)
     private String title;
 
     @NonNull

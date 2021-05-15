@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import pl.lodz.p.it.zzpj.entity.thesis.Word;
 import pl.lodz.p.it.zzpj.exception.AppBaseException;
 import pl.lodz.p.it.zzpj.service.thesis.repository.WordRepository;
 
@@ -15,9 +16,7 @@ public class WordService {
 
     private final WordRepository wordRepository;
 
-    public String addTopic(String name) {
-//        Topic topic = new Topic(name);
-//        return wordRepository.save(topic);
-        return "";
+    public Word getWord(Long id) {
+        return wordRepository.getById(id);
     }
 }
