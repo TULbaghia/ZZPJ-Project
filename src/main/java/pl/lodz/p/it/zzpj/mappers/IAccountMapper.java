@@ -10,4 +10,7 @@ public interface IAccountMapper {
 
     @Mapping(source = "accountRole", target = "accountRole")
     Account toAccount(AccountDto accountDto);
+
+    @Mapping(source = "accountRole", target = "accountRole")
+    AccountDto toAccountDto(Account account);
 }

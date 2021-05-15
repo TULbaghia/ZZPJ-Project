@@ -8,6 +8,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import pl.lodz.p.it.zzpj.entities.user.Account;
 import pl.lodz.p.it.zzpj.entities.token.ConfirmationToken;
+import pl.lodz.p.it.zzpj.entities.user.AccountRole;
 import pl.lodz.p.it.zzpj.repositories.AccountRepository;
 
 import java.time.LocalDateTime;
@@ -33,13 +34,17 @@ public class AccountService implements UserDetailsService {
         return accountRepository.findAll();
     }
 
+    public void addAdminPermissions(String email) {
+        Account accountToUpdate = (Account) loadUserByUsername(email);
+        accountToUpdate.setAccountRole(AccountRole.ADMIN);
+        accountRepository.save(accountToUpdate);
+    }
+
     public String singUpUser(Account account) {
         boolean userExists = accountRepository
                 .findByEmail(account.getEmail())
                 .isPresent();
         if (userExists) {
-            // TODO check of attributes are the same and
-            // TODO if email not confirmed send confirmation email.
             throw new IllegalStateException(String.format("Email: '%s' already taken", account.getEmail()));
         }
 
