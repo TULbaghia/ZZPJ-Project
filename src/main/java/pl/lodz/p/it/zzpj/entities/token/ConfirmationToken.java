@@ -3,7 +3,7 @@ package pl.lodz.p.it.zzpj.entities.token;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import pl.lodz.p.it.zzpj.entities.user.AppUser;
+import pl.lodz.p.it.zzpj.entities.user.Account;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -38,13 +38,13 @@ public class ConfirmationToken {
     private LocalDateTime confirmedAt;
 
     @ManyToOne
-    @JoinColumn(nullable = false, name = "app_user_id")
-    private AppUser appUser;
+    @JoinColumn(nullable = false, name = "account_id")
+    private Account account;
 
-    public ConfirmationToken(String token, LocalDateTime createdAt, LocalDateTime expiresAt, AppUser appUser) {
+    public ConfirmationToken(String token, LocalDateTime createdAt, LocalDateTime expiresAt, Account account) {
         this.token = token;
         this.createdAt = createdAt;
         this.expiresAt = expiresAt;
-        this.appUser = appUser;
+        this.account = account;
     }
 }

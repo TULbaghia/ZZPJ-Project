@@ -5,18 +5,18 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import pl.lodz.p.it.zzpj.entities.user.AppUser;
+import pl.lodz.p.it.zzpj.entities.user.Account;
 
 import java.util.Optional;
 
 @Repository
 @Transactional(readOnly = true)
-public interface UserRepository extends JpaRepository<AppUser, Long> {
+public interface AccountRepository extends JpaRepository<Account, Long> {
 
-    Optional<AppUser> findByEmail(String email);
+    Optional<Account> findByEmail(String email);
 
     @Transactional
     @Modifying
-    @Query("UPDATE AppUser a SET a.enabled = TRUE WHERE a.email = ?1")
+    @Query("UPDATE Account a SET a.enabled = TRUE WHERE a.email = ?1")
     int enableUser(String email);
 }

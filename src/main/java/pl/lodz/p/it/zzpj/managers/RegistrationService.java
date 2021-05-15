@@ -3,11 +3,11 @@ package pl.lodz.p.it.zzpj.managers;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pl.lodz.p.it.zzpj.dtos.RegistrationRequest;
+import pl.lodz.p.it.zzpj.dtos.RegisterAccountDto;
 import pl.lodz.p.it.zzpj.email.EmailSender;
 import pl.lodz.p.it.zzpj.entities.token.ConfirmationToken;
-import pl.lodz.p.it.zzpj.entities.user.AppUser;
-import pl.lodz.p.it.zzpj.entities.user.UserRole;
+import pl.lodz.p.it.zzpj.entities.user.Account;
+import pl.lodz.p.it.zzpj.entities.user.AccountRole;
 import pl.lodz.p.it.zzpj.validators.EmailValidator;
 
 import java.time.LocalDateTime;
@@ -16,20 +16,20 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class RegistrationService {
 
-    private final UserService userService;
+    private final AccountService accountService;
     private final EmailValidator emailValidator;
     private final ConfirmationTokenService confirmationTokenService;
     private final EmailSender emailSender;
 
-    public String register(RegistrationRequest request) {
+    public String register(RegisterAccountDto request) {
         boolean isValidEmail = emailValidator.test(request.getEmail());
         if (!isValidEmail) {
             throw new IllegalStateException("Email not valid");
         }
-        String token = userService
-                .singUpUser(new AppUser(request.getFirstName(), request.getLastName(), request.getEmail(), request.getPassword(), UserRole.USER));
+        String token = accountService
+                .singUpUser(new Account(request.getFirstName(), request.getLastName(), request.getEmail(), request.getPassword(), AccountRole.USER));
 
-        String link = "http://localhost:8080/api/v1/registration/confirm?token=" + token;
+        String link = "http://localhost:8080/api/registration/confirm?token=" + token;
         emailSender.send(request.getEmail(), buildEmail(request.getFirstName(), link));
         return token;
     }
@@ -49,7 +49,7 @@ public class RegistrationService {
         }
 
         confirmationTokenService.setConfirmedAt(token);
-        userService.enableUser(confirmationToken.getAppUser().getEmail());
+        accountService.enableUser(confirmationToken.getAccount().getEmail());
         return "confirmed";
     }
 

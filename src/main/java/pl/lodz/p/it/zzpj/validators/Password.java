@@ -1,9 +1,7 @@
-package pl.lodz.p.it.zzpj.utils.validation;
+package pl.lodz.p.it.zzpj.validators;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;
-import javax.validation.constraints.Digits;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.Size;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
