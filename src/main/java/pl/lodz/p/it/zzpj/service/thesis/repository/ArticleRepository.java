@@ -6,8 +6,9 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import pl.lodz.p.it.zzpj.entity.thesis.Article;
+import pl.lodz.p.it.zzpj.exception.AppBaseException;
 
 @Repository
-@Transactional(propagation = Propagation.MANDATORY, isolation = Isolation.READ_COMMITTED)
+@Transactional(propagation = Propagation.MANDATORY, isolation = Isolation.READ_COMMITTED, rollbackFor = AppBaseException.class)
 public interface ArticleRepository extends JpaRepository<Article, Long> {
 }

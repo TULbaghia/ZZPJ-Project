@@ -9,7 +9,7 @@ public class ThesisFilter {
     public static HashMap<String, Integer> filterWord(String thesis) {
         HashMap<String, Integer> wordsCount = new HashMap<>();
         List<String> words = Arrays.asList(thesis.split(" "));
-        words = words.stream().map(ThesisFilter::cleanString).filter(x -> !"".equals(x)).collect(Collectors.toList());
+        words = words.stream().map(ThesisFilter::cleanString).filter(x -> !"".equals(x) && x.length() > 1).collect(Collectors.toList());
         words.forEach(x -> {
             if (wordsCount.containsKey(x)) {
                 wordsCount.put(x, wordsCount.get(x) + 1);
@@ -25,7 +25,17 @@ public class ThesisFilter {
         if (clean != null) {
             clean = clean.replaceAll("[^a-zA-Z\\-]", "");
             clean = clean.toLowerCase();
+            if (clean.startsWith("-")) {
+                clean = clean.substring(1);
+            }
+            if (clean.endsWith("-")) {
+                clean = removeLastCharRegex(clean);
+            }
         }
         return clean;
+    }
+
+    private static String removeLastCharRegex(String s) {
+        return (s == null) ? null : s.replaceAll(".$", "");
     }
 }

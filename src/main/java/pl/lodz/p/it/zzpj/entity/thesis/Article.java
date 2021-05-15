@@ -1,6 +1,7 @@
 package pl.lodz.p.it.zzpj.entity.thesis;
 
 import lombok.*;
+import pl.lodz.p.it.zzpj.service.thesis.validator.Doi;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -31,17 +32,22 @@ public class Article {
     @EqualsAndHashCode.Include
     private Long id;
 
+    @Doi
     @NonNull
     @Column(nullable = false, updatable = false)
     @EqualsAndHashCode.Include
     private String doi;
 
     @NonNull
-    @Column(length = Short.MAX_VALUE, nullable = false)
+    @Column(nullable = false, updatable = false)
+    private String title;
+
+    @NonNull
+    @Column(length = Short.MAX_VALUE, nullable = false, updatable = false)
     private String thesisAbstract;
 
     @ToString.Exclude
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinTable(name = "topic_article",
             joinColumns = @JoinColumn(name = "article_id"),
             inverseJoinColumns = @JoinColumn(name = "topic_id"))

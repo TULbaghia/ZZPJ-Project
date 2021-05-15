@@ -40,13 +40,7 @@ public class TopicController {
                 .collect(Collectors.toList());
     }
 
-    // TODO: updateTopic - dodawanie do topicu
-//    @PutMapping(path = "{id}")
-//    @ResponseBody
-//    public TopicDto updateTopic() {
-//        return new TopicDto();
-//    }
-
+    // TODO: update - NO?
 
     @DeleteMapping(path = "/{id}")
     @ResponseBody

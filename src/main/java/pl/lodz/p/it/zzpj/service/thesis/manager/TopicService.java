@@ -6,13 +6,14 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import pl.lodz.p.it.zzpj.entity.thesis.Topic;
+import pl.lodz.p.it.zzpj.exception.AppBaseException;
 import pl.lodz.p.it.zzpj.service.thesis.repository.TopicRepository;
 
 import java.util.List;
 
 @Service
 @AllArgsConstructor
-@Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED)
+@Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED, rollbackFor = AppBaseException.class)
 public class TopicService {
 
     private final TopicRepository topicRepository;

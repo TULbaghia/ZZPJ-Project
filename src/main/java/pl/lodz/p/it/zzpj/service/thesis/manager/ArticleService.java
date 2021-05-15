@@ -1,33 +1,71 @@
 package pl.lodz.p.it.zzpj.service.thesis.manager;
 
 import lombok.AllArgsConstructor;
-import org.mapstruct.factory.Mappers;
+import lombok.extern.java.Log;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import pl.lodz.p.it.zzpj.service.thesis.dto.internal.ArticleListDto;
 import pl.lodz.p.it.zzpj.entity.thesis.Article;
 import pl.lodz.p.it.zzpj.entity.thesis.Topic;
+import pl.lodz.p.it.zzpj.exception.AppBaseException;
+import pl.lodz.p.it.zzpj.service.thesis.api.NatureApi;
 import pl.lodz.p.it.zzpj.service.thesis.mapper.IArticleMapper;
 import pl.lodz.p.it.zzpj.service.thesis.repository.ArticleRepository;
 import pl.lodz.p.it.zzpj.service.thesis.repository.TopicRepository;
+import pl.lodz.p.it.zzpj.service.thesis.validator.Doi;
+import pl.lodz.p.it.zzpj.service.thesis.validator.Subject;
 
+import javax.persistence.PersistenceException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
+@Log
 @Service
 @AllArgsConstructor
-@Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED)
+@Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED, rollbackFor = AppBaseException.class)
 public class ArticleService {
 
     private final TopicRepository topicRepository;
 
     private final ArticleRepository articleRepository;
 
-    public void create() {
+    private final NatureApi natureApi;
 
+    private final ArticleWordService articleWordService;
+
+    public void createFromDoi(@Doi String doi) throws AppBaseException {
+        var articleDto = natureApi.getByDoi(doi);
+        var article = IArticleMapper.INSTANCE.toArticle(articleDto);
+
+        List<Topic> topics = new ArrayList<>();
+
+        articleDto.getTopicList().forEach(x -> {
+            var topic = topicRepository.findByName(x);
+            topics.add(topic == null ? new Topic(x) : topic);
+        });
+
+        topics.forEach(x -> {
+            x.getArticleList().add(article);
+            article.getTopicList().add(x);
+        });
+
+        articleRepository.saveAndFlush(article);
+        articleWordService.generateForId(article.getId());
+    }
+
+    public void createFromTopic(@Subject String topic, int start, int pagination) throws AppBaseException {
+        var articleDto = natureApi.getByTopic(topic, start, pagination);
+
+        articleDto.forEach(x -> {
+            try {
+                createFromDoi(x);
+            } catch (AppBaseException e) {
+                log.warning(e.getMessage());
+            }
+        });
     }
 
     public Article getArticle(Long id) {
@@ -38,24 +76,8 @@ public class ArticleService {
         return articleRepository.findAll();
     }
 
-    public void update() {}
-
     public void delete(Long id) {
         articleRepository.deleteById(id);
-    }
-
-
-
-    public void storeArticle(ArticleListDto articleListDto, Long topicId) {
-        Topic topic = topicRepository.findById(topicId).orElseThrow();
-
-        IArticleMapper iArticleMapper = Mappers.getMapper(IArticleMapper.class);
-        Set<Article> articleList = articleListDto.getRecords().stream().map(iArticleMapper::toArticle).collect(Collectors.toSet());
-
-        articleList.forEach(x -> x.getTopicList().add(topic));
-        topic.setArticleList(articleList);
-
-        topicRepository.save(topic);
     }
 
 }

@@ -31,6 +31,7 @@ public class Topic {
     private Long id;
 
     @NonNull
+    @EqualsAndHashCode.Include
     @Column(nullable = false, updatable = false)
     private String name;
 
