@@ -1,9 +1,9 @@
-package pl.lodz.p.it.zzpj.registration.token;
+package pl.lodz.p.it.zzpj.entities.token;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import pl.lodz.p.it.zzpj.users.AppUser;
+import pl.lodz.p.it.zzpj.entities.user.AppUser;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;

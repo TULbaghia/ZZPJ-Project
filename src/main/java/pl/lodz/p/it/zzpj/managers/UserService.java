@@ -1,4 +1,4 @@
-package pl.lodz.p.it.zzpj.users;
+package pl.lodz.p.it.zzpj.managers;
 
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -6,8 +6,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import pl.lodz.p.it.zzpj.registration.token.ConfirmationToken;
-import pl.lodz.p.it.zzpj.registration.token.ConfirmationTokenService;
+import pl.lodz.p.it.zzpj.entities.user.AppUser;
+import pl.lodz.p.it.zzpj.entities.token.ConfirmationToken;
+import pl.lodz.p.it.zzpj.repositories.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

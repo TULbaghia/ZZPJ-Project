@@ -1,14 +1,14 @@
-package pl.lodz.p.it.zzpj.registration;
+package pl.lodz.p.it.zzpj.managers;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pl.lodz.p.it.zzpj.dtos.RegistrationRequest;
 import pl.lodz.p.it.zzpj.email.EmailSender;
-import pl.lodz.p.it.zzpj.registration.token.ConfirmationToken;
-import pl.lodz.p.it.zzpj.registration.token.ConfirmationTokenService;
-import pl.lodz.p.it.zzpj.users.AppUser;
-import pl.lodz.p.it.zzpj.users.UserRole;
-import pl.lodz.p.it.zzpj.users.UserService;
+import pl.lodz.p.it.zzpj.entities.token.ConfirmationToken;
+import pl.lodz.p.it.zzpj.entities.user.AppUser;
+import pl.lodz.p.it.zzpj.entities.user.UserRole;
+import pl.lodz.p.it.zzpj.validators.EmailValidator;
 
 import java.time.LocalDateTime;
 
@@ -53,7 +53,7 @@ public class RegistrationService {
         return "confirmed";
     }
 
-    //   TODO: Maybe another class ?
+    //   TODO: Maybe another class?
     private String buildEmail(String name, String link) {
         return "<div style=\"font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#0b0c0c\">\n" +
                 "\n" +

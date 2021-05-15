@@ -4,6 +4,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import pl.lodz.p.it.zzpj.jwt.JwtConfig;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.context.annotation.Bean;
+import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication
 @EnableConfigurationProperties(JwtConfig.class)
@@ -13,4 +16,8 @@ public class ZzpjApplication {
         SpringApplication.run(ZzpjApplication.class, args);
     }
 
+    @Bean
+    public RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder) {
+        return restTemplateBuilder.build();
+    }
 }
