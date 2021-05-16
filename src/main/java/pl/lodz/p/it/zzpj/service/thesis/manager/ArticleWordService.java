@@ -13,7 +13,6 @@ import pl.lodz.p.it.zzpj.service.thesis.repository.ArticleWordRepository;
 import pl.lodz.p.it.zzpj.service.thesis.repository.WordRepository;
 import pl.lodz.p.it.zzpj.service.thesis.utils.ThesisFilter;
 
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -36,9 +35,9 @@ public class ArticleWordService {
 
         var articleWords = words.entrySet()
                 .stream()
-                .map( (entry) -> {
+                .map((entry) -> {
                     var word = wordRepository.findByWord(entry.getKey());
-                    if(word == null) {
+                    if (word == null) {
                         word = new Word(entry.getKey());
                     }
                     return new ArticleWord(article, word, entry.getValue());
@@ -52,7 +51,11 @@ public class ArticleWordService {
         return articleWordRepository.getArticleWordsForArticle(ids);
     }
 
-    public Long getOtherArticleWordsForWord(Long wordId, List<Long> articleWordIds) {
+    public Long getOtherArticleWordsForWord(Long wordId, Set<Long> articleWordIds) {
         return articleWordRepository.getOtherArticleWordsForWord(wordId, articleWordIds);
+    }
+
+    public Set<Object[]> findArticleWordsFromArticleIds(Set<Long> articleIds) {
+        return articleWordRepository.findArticleWordsFromArticleIds(articleIds);
     }
 }

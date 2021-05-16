@@ -2,8 +2,6 @@ package pl.lodz.p.it.zzpj.service.thesis.manager;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.java.Log;
-import org.hibernate.exception.ConstraintViolationException;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -12,16 +10,15 @@ import pl.lodz.p.it.zzpj.entity.thesis.Article;
 import pl.lodz.p.it.zzpj.entity.thesis.Topic;
 import pl.lodz.p.it.zzpj.exception.AppBaseException;
 import pl.lodz.p.it.zzpj.service.thesis.api.NatureApi;
-import pl.lodz.p.it.zzpj.service.thesis.dto.internal.ArticleDto;
 import pl.lodz.p.it.zzpj.service.thesis.mapper.IArticleMapper;
 import pl.lodz.p.it.zzpj.service.thesis.repository.ArticleRepository;
 import pl.lodz.p.it.zzpj.service.thesis.repository.TopicRepository;
 import pl.lodz.p.it.zzpj.service.thesis.validator.Doi;
 import pl.lodz.p.it.zzpj.service.thesis.validator.Subject;
 
-import javax.persistence.PersistenceException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Log
 @Service
@@ -71,5 +68,9 @@ public class ArticleService {
 
     public void delete(Long id) {
         articleRepository.deleteById(id);
+    }
+
+    public Set<Long> findTopicIdsFromArticlesIdsWithoutBannedTopic(Set<Long> articleIds, Set<Long> bannedTopicIds) {
+        return articleRepository.findTopicIdsFromArticlesIdsWithoutBannedTopic(articleIds, bannedTopicIds);
     }
 }

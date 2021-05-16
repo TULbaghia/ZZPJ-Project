@@ -1,81 +1,67 @@
 package pl.lodz.p.it.zzpj.service.thesis.controller;
 
 import lombok.AllArgsConstructor;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import pl.lodz.p.it.zzpj.entity.thesis.Article;
-import pl.lodz.p.it.zzpj.entity.thesis.ArticleWord;
-import pl.lodz.p.it.zzpj.entity.thesis.Topic;
+import pl.lodz.p.it.zzpj.service.thesis.dto.WordDto;
+import pl.lodz.p.it.zzpj.service.thesis.manager.ArticleService;
 import pl.lodz.p.it.zzpj.service.thesis.manager.ArticleWordService;
 import pl.lodz.p.it.zzpj.service.thesis.manager.TopicService;
 import pl.lodz.p.it.zzpj.service.thesis.manager.WordService;
+import pl.lodz.p.it.zzpj.service.thesis.mapper.IWordMapper;
 
+import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(path = "api/question")
 @AllArgsConstructor
+@Transactional(propagation = Propagation.NEVER)
 public class QuestionController {
-    private static final int EPOCHS_NUMBER = 2;
+    private static final int EPOCHS_NUMBER = 0;
+    private static final int RETURN_SIZE = 20;
 
     private final TopicService topicService;
-
+    private final ArticleService articleService;
     private final ArticleWordService articleWordService;
+    private final WordService wordService;
 
     @GetMapping(path = "{topicId}")
     @ResponseBody
-    public String getQuestions(@PathVariable Long topicId) {
-        Topic topic = topicService.getTopic(topicId);
-        Set<Article> articleList = topic.getArticleList();
+    public Set<WordDto> getQuestions(@PathVariable Long topicId) {
+        List<Set<Long>> topArticles = new ArrayList<>();
+        topArticles.add(topicService.findArticleIdsConnectedWithTopics(Set.of(topicId)));
 
-        List<Set<Article>> topArticles = new ArrayList<>();
-        topArticles.add(articleList);
-        Set<Topic> usedTopics = new HashSet<>();
-        usedTopics.add(topic);
+        Set<Long> usedTopics = new HashSet<>();
+        usedTopics.add(topicId);
 
         for (int i = 0; i < EPOCHS_NUMBER; i++) {
             // Tematy, które są powiązane z wcześniej występującymi, ale zostały wykryte ostatniej epoce
-            var topics = topArticles.stream()
-                    .flatMap(Collection::stream)
-                    .map(Article::getTopicList)
-                    .flatMap(Collection::stream)
-                    .filter(x -> !usedTopics.contains(x))
-                    .collect(Collectors.toSet());
+            var topics = articleService.findTopicIdsFromArticlesIdsWithoutBannedTopic(
+                    topArticles.stream().flatMap(Collection::stream).collect(Collectors.toSet()),
+                    usedTopics
+            );
 
             // Dodanie tematów do zbioru, tematów, które już wystąpiły
             usedTopics.addAll(topics);
 
-            // Wszystkie artykuły sprawdzone dotychczas, w celu zapewnienia unikalności, sprowadzone do Set
-            var flatTopArticles = topArticles.stream()
-                    .flatMap(Collection::stream)
-                    .collect(Collectors.toSet());
-
             // Artykuły, które nie wystąpiły wcześniej w topArticles, a mają powiązanie z nowymi tematami
             // które wystąpiły w ostatniej epoce
-            var uniqueArticlesConnected = topics.stream()
-                    .map(Topic::getArticleList)
-                    .flatMap(Collection::stream)
-                    .filter(x -> !flatTopArticles.contains(x))
-                    .collect(Collectors.toSet());
+            var uniqueArticlesConnected = topicService.findArticleIdsConnectedWithTopicsWithoutBannedArticles(
+                    topics,
+                    topArticles.stream().flatMap(Collection::stream).collect(Collectors.toSet())
+            );
 
             // Dodanie artykułów do zbioru artykułów, które już wystąpiły
             topArticles.add(uniqueArticlesConnected);
         }
 
-        // ID artykułów z wszystkich epok wg. ważności
-        List<Set<Long>> identificators = new ArrayList<>();
-
-        // Lista zawierająca sety z ArticleWord, pochodzące z wszystkich epok wg. ważności
-        List<Set<ArticleWord>> articleWords = new ArrayList<>();
-        topArticles.parallelStream().forEach(x -> {
-            identificators.add(x.parallelStream()
-                    .map(Article::getId)
-                    .collect(Collectors.toSet()));
-        });
-
         // Wykonanie kwerend na bazie danych
-        identificators.parallelStream().forEach(x -> {
-            articleWords.add(articleWordService.getArticleWordsForArticle(x));
+        List<Set<Object[]>> articleWords = new ArrayList<>();
+        topArticles.forEach(x -> {
+            articleWords.add(articleWordService.findArticleWordsFromArticleIds(x));
         });
 
         // HashMap dodany w celu ułatwienia odrzucenia słów, które są poza rozpatrywanymi zbiorami "trafionych" słów
@@ -83,26 +69,62 @@ public class QuestionController {
         articleWords.stream()
                 .flatMap(Collection::stream)
                 .forEach(x -> {
-                    Long wordId = x.getWord().getId();
+                    Long awId = ((BigInteger) x[0]).longValue();
+                    Long wordId = ((BigInteger) x[1]).longValue();
                     if (articleWithWordIdList.containsKey(wordId)) {
-                        articleWithWordIdList.get(wordId).add(x.getId());
+                        articleWithWordIdList.get(wordId).add(awId);
                     } else {
                         Set<Long> newHashSet = new HashSet<>();
-                        newHashSet.add(x.getId());
-                        articleWithWordIdList.put(x.getWord().getId(), newHashSet);
+                        newHashSet.add(awId);
+                        articleWithWordIdList.put(wordId, newHashSet);
                     }
                 });
 
         // Id słów, które są częścią abstraktów artykułów, powiązanych z tematem podanym przez użytkownika lub powiązanymi
         // Słowa, które są dozwolone do wykorzystania w procesie tworzenia testów dla użytkownika.
-        HashMap<Long, Boolean> wordIdsAllowed = new HashMap<>();
-        articleWithWordIdList.entrySet().parallelStream()
+        Set<Long> wordIdsAllowed = new HashSet<>();
+        articleWithWordIdList.entrySet()
+                .parallelStream()
                 .forEach(x -> {
                     Long isPresent = articleWordService
-                            .getOtherArticleWordsForWord(x.getKey(), new ArrayList<>(x.getValue()));
-                    wordIdsAllowed.put(x.getKey(), isPresent == 0);
+                            .getOtherArticleWordsForWord(x.getKey(), x.getValue());
+                    if (isPresent == 0L) {
+                        wordIdsAllowed.add(x.getKey());
+                    }
                 });
 
-        return "";
+        List<Set<Long>> wordIdsWithEpochPriority = new ArrayList<>();
+
+        articleWords.forEach(x -> {
+            var words = x.stream()
+                    .map(y -> ((BigInteger) y[1]).longValue())
+                    .collect(Collectors.toSet());
+            words.retainAll(wordIdsAllowed);
+
+            wordIdsWithEpochPriority.add(words);
+        });
+
+        for (int i = 0; i < wordIdsWithEpochPriority.size() - 1; i++) {
+            for (int j = i + 1; j < wordIdsWithEpochPriority.size(); j++) {
+                wordIdsWithEpochPriority.get(i)
+                        .removeAll(wordIdsWithEpochPriority.get(j));
+            }
+        }
+
+        var allowedWords = wordIdsWithEpochPriority
+                .stream()
+                .map(x -> {
+                    var list = new ArrayList<>(x);
+                    Collections.shuffle(list);
+                    return list;
+                })
+                .flatMap(Collection::stream)
+                .limit(RETURN_SIZE)
+                .map(wordService::getWord)
+                .map(IWordMapper.INSTANCE::toWordDto)
+                .collect(Collectors.toSet());
+
+
+        return allowedWords;
     }
 }

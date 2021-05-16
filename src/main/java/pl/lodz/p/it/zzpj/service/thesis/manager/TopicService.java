@@ -10,6 +10,7 @@ import pl.lodz.p.it.zzpj.exception.AppBaseException;
 import pl.lodz.p.it.zzpj.service.thesis.repository.TopicRepository;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @AllArgsConstructor
@@ -33,5 +34,13 @@ public class TopicService {
 
     public void deleteTopic(Long id) {
         topicRepository.deleteById(id);
+    }
+
+    public Set<Long> findArticleIdsConnectedWithTopics(Set<Long> topicId) {
+        return topicRepository.findArticleIdsConnectedWithTopics(topicId);
+    }
+
+    public Set<Long> findArticleIdsConnectedWithTopicsWithoutBannedArticles(Set<Long> topicIds, Set<Long> bannedArticlesIds) {
+        return topicRepository.findArticleIdsConnectedWithTopicsWithoutBannedArticles(topicIds, bannedArticlesIds);
     }
 }
