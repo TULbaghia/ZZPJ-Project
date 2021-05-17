@@ -18,7 +18,7 @@ import java.util.Objects;
 @Service
 @AllArgsConstructor
 public class NatureApi {
-    private static final String API_KEY = "30fb3f3f29b1ac21fdea732e62eddac1";
+    private static final String API_KEY = "f2bfd2ed05590ef7ac4412d3fa700002";
     private static final String BASE_URL = "https://api.springernature.com/meta/v2/json?api_key=" + API_KEY;
     private static final String TOPIC_URL = BASE_URL + "&q=subject:%s&s=%d&p=%d";
     private static final String DOI_URL = BASE_URL + "&q=doi:%s&s=1&p=1";
