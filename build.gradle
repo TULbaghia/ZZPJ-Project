@@ -20,10 +20,6 @@ repositories {
     maven { url 'https://repo.spring.io/milestone' }
 }
 
-ext {
-    set('testcontainersVersion', "1.15.3")
-}
-
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
@@ -51,15 +47,9 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
-    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation group: 'com.h2database', name: 'h2', version: '1.4.200'
 
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
-}
-
-dependencyManagement {
-    imports {
-        mavenBom "org.testcontainers:testcontainers-bom:${testcontainersVersion}"
-    }
 }
 
 test {
@@ -94,9 +84,6 @@ frontend {
 task copyReactBuild(type: Copy) {
     from "src/main/frontend/build"
     into "build/resources/main/static"
-//    into ("./build/resources/main/static") {
-//        from "./src/main/frontend/build"
-//    }
 }
 
 assembleFrontend.finalizedBy copyReactBuild
