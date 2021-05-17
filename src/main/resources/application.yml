@@ -5,17 +5,17 @@ server:
 
 spring:
   datasource:
-    password: root
-    url: jdbc:postgresql://localhost:5432/zzpj
-    username: root
+    password: example
+    url: jdbc:postgresql://localhost:5432/example
+    username: example
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: validate
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
-    show-sql: true
+    show-sql: false
 
   #mail:
   mail:

@@ -19,7 +19,7 @@ import java.util.Date;
 
 @Log
 @AllArgsConstructor
-public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
+public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
     private final JwtConfig jwtConfig;
@@ -28,13 +28,12 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
-
         try {
             LoginCredentials loginCredentials =
                     new ObjectMapper()
                             .readValue(request.getInputStream(), LoginCredentials.class);
 
-            Authentication authentication = new UsernamePasswordAuthenticationToken(loginCredentials.getUsername(),
+            Authentication authentication = new UsernamePasswordAuthenticationToken(loginCredentials.getEmail(),
                     loginCredentials.getPassword());
 
             return authenticationManager.authenticate(authentication);
@@ -42,20 +41,16 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
     }
 
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
                                             Authentication authResult) {
 
-//        String key = "exampleexampleexampleexampleexampleexampleexampleexampleexampleexample";
-
         String token = Jwts.builder()
                 .setSubject(authResult.getName())
                 .claim("authorities", authResult.getAuthorities())
                 .setIssuedAt(new Date())
-//                .setExpiration(java.sql.Date.valueOf(LocalDateTime.now().plusSeconds(jwtConfig.getTokenExpiration())))
                 .setExpiration(new Date(new Date().getTime() + jwtConfig.getTokenExpiration()))
                 .signWith(secretKey)
                 .compact();

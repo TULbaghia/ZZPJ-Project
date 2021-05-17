@@ -12,24 +12,38 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import pl.lodz.p.it.zzpj.service.auth.manager.AccountService;
+import pl.lodz.p.it.zzpj.service.auth.security.jwt.JwtAuthenticationFilter;
 import pl.lodz.p.it.zzpj.service.auth.security.jwt.JwtConfig;
 import pl.lodz.p.it.zzpj.service.auth.security.jwt.JwtTokenVerifier;
-import pl.lodz.p.it.zzpj.service.auth.security.jwt.JwtUsernameAndPasswordAuthenticationFilter;
-import pl.lodz.p.it.zzpj.service.auth.manager.UserService;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import javax.crypto.SecretKey;
 
 @AllArgsConstructor
 @Configuration
 @EnableWebSecurity
-@EnableSwagger2
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private final UserService userService;
+    private final AccountService accountService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final JwtConfig jwtConfig;
     private final SecretKey secretKey;
+
+    private static final String[] AUTH_WHITELIST = {
+            // -- Swagger UI v2
+            "/v2/api-docs",
+            "/swagger-resources",
+            "/swagger-resources/**",
+            "/configuration/ui",
+            "/configuration/security",
+            "/swagger-ui.html",
+            "/webjars/**",
+            // -- Swagger UI v3 (OpenAPI)
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
+            "/error"
+            // other public endpoints of your API may be appended to this array
+    };
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -38,14 +52,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/api/**").permitAll()
-//                .antMatchers("/api/ping").hasAuthority("USER")
+                .antMatchers("/api/registration/**").permitAll()
+                .antMatchers(AUTH_WHITELIST).permitAll()
+                .antMatchers("/api/ping").hasAuthority("USER")
+                .antMatchers("/api/accounts/**").hasAuthority("ADMIN")
                 .anyRequest().authenticated()
                 .and()
-                .addFilter(new JwtUsernameAndPasswordAuthenticationFilter(authenticationManager(), jwtConfig, secretKey))
-                .addFilterAfter(new JwtTokenVerifier(jwtConfig, secretKey), JwtUsernameAndPasswordAuthenticationFilter.class)
+                .addFilter(new JwtAuthenticationFilter(authenticationManager(), jwtConfig, secretKey))
+                .addFilterAfter(new JwtTokenVerifier(jwtConfig, secretKey), JwtAuthenticationFilter.class)
                 .exceptionHandling()
-                .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
+                .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                .and().headers().frameOptions().disable();
     }
 
     @Override
@@ -57,7 +74,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public DaoAuthenticationProvider daoAuthenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setPasswordEncoder(bCryptPasswordEncoder);
-        provider.setUserDetailsService(userService);
+        provider.setUserDetailsService(accountService);
         return provider;
     }
 }

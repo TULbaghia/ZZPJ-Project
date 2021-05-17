@@ -2,18 +2,18 @@ package pl.lodz.p.it.zzpj.service.auth.controller;
 
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import pl.lodz.p.it.zzpj.service.auth.dto.RegistrationRequest;
+import pl.lodz.p.it.zzpj.service.auth.dto.RegisterAccountDto;
 import pl.lodz.p.it.zzpj.service.auth.manager.RegistrationService;
 
 @RestController
-@RequestMapping(path = "api/v1/registration")
+@RequestMapping(path = "api/registration")
 @AllArgsConstructor
 public class RegistrationController {
 
     private final RegistrationService registrationService;
 
     @PostMapping
-    public String register(@RequestBody RegistrationRequest request) {
+    public String register(@RequestBody RegisterAccountDto request) {
         return registrationService.register(request);
     }
 

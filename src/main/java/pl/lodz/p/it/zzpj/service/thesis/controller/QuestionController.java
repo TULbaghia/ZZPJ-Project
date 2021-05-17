@@ -86,9 +86,7 @@ public class QuestionController {
         articleWithWordIdList.entrySet()
                 .parallelStream()
                 .forEach(x -> {
-                    Long isPresent = articleWordService
-                            .getOtherArticleWordsForWord(x.getKey(), x.getValue());
-                    if (isPresent == 0L) {
+                    if (articleWordService.getOtherArticleWordsForWord(x.getKey(), x.getValue()) == 0L) {
                         wordIdsAllowed.add(x.getKey());
                     }
                 });

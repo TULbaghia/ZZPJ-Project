@@ -1,6 +1,6 @@
 package pl.lodz.p.it.zzpj.entity.user;
 
-public enum UserRole {
+public enum AccountRole {
     USER,
     ADMIN
 }
