@@ -70,7 +70,7 @@ public class ArticleService {
         articleRepository.deleteById(id);
     }
 
-    public Set<Long> findTopicIdsFromArticlesIdsWithoutBannedTopic(Set<Long> articleIds, Set<Long> bannedTopicIds) {
-        return articleRepository.findTopicIdsFromArticlesIdsWithoutBannedTopic(articleIds, bannedTopicIds);
+    public Set<Long> findNotBannedTopicIdsFromArticleIds(Set<Long> articleIds, Set<Long> bannedTopicIds) {
+        return articleRepository.findNotBannedTopicIdsFromArticleIds(articleIds, bannedTopicIds);
     }
 }
