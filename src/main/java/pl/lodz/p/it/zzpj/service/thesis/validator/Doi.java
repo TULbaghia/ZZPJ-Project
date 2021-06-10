@@ -13,9 +13,9 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 @NotNull
-@Pattern(regexp = ThesisRegularExpression.DOI, message = "{validation.doi.pattern}")
+@Pattern(regexp = ThesisRegularExpression.DOI, message = "validation.doi.pattern")
 public @interface Doi {
-    String message() default "{validation.doi}";
+    String message() default "validation.doi";
 
     Class<?>[] groups() default {};
 
