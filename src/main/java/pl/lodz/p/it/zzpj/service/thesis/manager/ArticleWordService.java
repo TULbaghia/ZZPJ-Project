@@ -38,7 +38,7 @@ public class ArticleWordService {
                 .map((entry) -> {
                     var word = wordRepository.findByWord(entry.getKey());
                     if (word == null) {
-                        word = new Word(entry.getKey());
+                        word = new Word(entry.getKey(), "");
                     }
                     return new ArticleWord(article, word, entry.getValue());
                 })

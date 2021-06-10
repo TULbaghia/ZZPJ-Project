@@ -53,6 +53,9 @@ dependencies {
     testImplementation group: 'com.h2database', name: 'h2', version: '1.4.200'
     testImplementation 'org.testcontainers:junit-jupiter'
 
+    testCompileOnly 'org.projectlombok:lombok:1.18.20'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.20'
+
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
 }
 
