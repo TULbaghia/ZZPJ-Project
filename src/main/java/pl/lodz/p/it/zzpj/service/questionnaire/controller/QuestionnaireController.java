@@ -17,6 +17,12 @@ public class QuestionnaireController {
 
     private final QuestionnaireService questionnaireService;
 
+    @GetMapping(path = "{topicId}")
+    @ResponseBody
+    public QuestionnaireDto createQuestionnaireForTopic(@PathVariable Long topicId) {
+        return questionnaireService.getQuestions(topicId);
+    }
+
     @GetMapping(path = "/q/{questionnaireId}")
     @ResponseBody
     public QuestionnaireDto getQuestionnaireById(@PathVariable Long questionnaireId) {
