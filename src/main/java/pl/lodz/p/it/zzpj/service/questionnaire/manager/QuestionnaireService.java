@@ -92,7 +92,14 @@ public class QuestionnaireService {
 
     @SneakyThrows
     public QuestionnaireDto solveQuestionnaire(QuestionnaireDto questionnaireDto) {
+        String emailPrincipal = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+
+        Account account = accountRepository.findByEmail(emailPrincipal).orElseThrow();
         Questionnaire questionnaire = questionnaireRepository.getById(questionnaireDto.getId());
+
+        if (!questionnaire.getAccount().equals(account)) {
+            throw new AccessDeniedException("exception.access.denied");
+        }
 
         for (final QuestionnaireQuestion x : questionnaire.getQuestionnaireQuestions()) {
             var first = questionnaireDto.getQuestionnaireQuestions()
@@ -104,17 +111,18 @@ public class QuestionnaireService {
             }
 
             x.setResponse(first.get().getWord());
-            x.setCorrect(x.getWord().getWord().equalsIgnoreCase(x.getResponse()));
+
+            x.setCorrect(x.getWord().getTranslation().equalsIgnoreCase(x.getResponse()));
         }
 
         questionnaireRepository.saveAndFlush(questionnaire);
 
         QuestionnaireDto questionnaireDto1 = IQuestionnaireMapper.INSTANCE.toDto(questionnaire);
-        questionnaireDto1.setScore(questionnaire.getQuestionnaireQuestions()
+        questionnaireDto1.setScore((int) questionnaire.getQuestionnaireQuestions()
                 .stream()
                 .map(QuestionnaireQuestion::isCorrect)
-                .collect(Collectors.toList())
-                .size()
+                .filter(x -> x)
+                .count()
         );
 
         return questionnaireDto1;
