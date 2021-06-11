@@ -16,13 +16,19 @@ import java.util.Set;
 @Transactional(propagation = Propagation.MANDATORY, isolation = Isolation.READ_COMMITTED, rollbackFor = AppBaseException.class)
 public interface TopicRepository extends JpaRepository<Topic, Long> {
 
-    @Query("SELECT t FROM Topic t WHERE t.name = ?1")
-    Topic findByName(String name);
+    @Query("SELECT t FROM Topic t WHERE t.name = :name")
+    Topic findByName(@Param("name") String name);
 
-    @Query(value = "SELECT DISTINCT a.id FROM topic t JOIN topic_article ta ON ta.topic_id = t.id JOIN article a ON ta.article_id = a.id WHERE t.id IN (:topicIds)", nativeQuery = true)
-    Set<Long> findArticleIdsConnectedWithTopics(@Param("topicIds") Set<Long> topicIds);
+    @Query(value = "SELECT DISTINCT a.id FROM topic t " +
+            "JOIN topic_article ta ON ta.topic_id = t.id " +
+            "JOIN article a ON ta.article_id = a.id " +
+            "WHERE t.id IN (:topicIds)", nativeQuery = true)
+    Set<Long> findArticleIdsByTopics(@Param("topicIds") Set<Long> topicIds);
 
-    @Query(value = "SELECT DISTINCT a.id FROM topic t JOIN topic_article ta ON ta.topic_id = t.id JOIN article a ON ta.article_id = a.id WHERE t.id IN (:topicIds) AND a.id NOT IN (:bannedArticlesIds)", nativeQuery = true)
-    Set<Long> findArticleIdsConnectedWithTopicsWithoutBannedArticles(@Param("topicIds") Set<Long> topicIds, @Param("bannedArticlesIds") Set<Long> bannedArticlesIds);
+    @Query(value = "SELECT DISTINCT a.id FROM topic t " +
+            "JOIN topic_article ta ON ta.topic_id = t.id " +
+            "JOIN article a ON ta.article_id = a.id " +
+            "WHERE t.id IN (:topicIds) AND a.id NOT IN (:bannedArticlesIds)", nativeQuery = true)
+    Set<Long> findFilteredArticleIdsByTopics(@Param("topicIds") Set<Long> topicIds, @Param("bannedArticlesIds") Set<Long> bannedArticlesIds);
 
 }
