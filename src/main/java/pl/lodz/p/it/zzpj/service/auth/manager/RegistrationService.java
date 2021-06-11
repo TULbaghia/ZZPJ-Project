@@ -7,6 +7,7 @@ import pl.lodz.p.it.zzpj.email.EmailSender;
 import pl.lodz.p.it.zzpj.entity.token.ConfirmationToken;
 import pl.lodz.p.it.zzpj.entity.user.Account;
 import pl.lodz.p.it.zzpj.entity.user.AccountRole;
+import pl.lodz.p.it.zzpj.exception.RegistrationException;
 import pl.lodz.p.it.zzpj.service.auth.dto.RegisterAccountDto;
 
 import java.time.LocalDateTime;
@@ -19,10 +20,17 @@ public class RegistrationService {
     private final ConfirmationTokenService confirmationTokenService;
     private final EmailSender emailSender;
 
-    public String register(RegisterAccountDto request) {
-        String token = accountService
-                .singUpUser(new Account(request.getFirstName(), request.getLastName(), request.getEmail(),
-                        request.getPassword(), AccountRole.USER));
+    public String register(RegisterAccountDto request) throws RegistrationException {
+        String token = null;
+        try {
+            Account newAccount = new Account(request.getFirstName(), request.getLastName(), request.getEmail(),
+                    request.getPassword(), AccountRole.USER);
+            token = accountService.singUpUser(newAccount);
+        } catch (IllegalStateException illegalStateException) {
+            throw new RegistrationException(illegalStateException.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         String link = "http://localhost:8080/api/registration/confirm?token=" + token;
         emailSender.send(request.getEmail(), getEmailContent(request.getFirstName(), link));

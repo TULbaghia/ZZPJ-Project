@@ -8,6 +8,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import pl.lodz.p.it.zzpj.service.auth.validator.Email;
+import pl.lodz.p.it.zzpj.service.auth.validator.Firstname;
+import pl.lodz.p.it.zzpj.service.auth.validator.Lastname;
 import pl.lodz.p.it.zzpj.service.auth.validator.Password;
 
 import javax.persistence.*;
@@ -32,7 +34,9 @@ public class Account implements UserDetails {
             generator = "account_sequence"
     )
     private Long id;
+    @Firstname
     private String firstName;
+    @Lastname
     private String lastName;
     @Email
     private String email;
