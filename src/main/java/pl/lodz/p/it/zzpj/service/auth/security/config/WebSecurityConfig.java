@@ -3,6 +3,7 @@ package pl.lodz.p.it.zzpj.service.auth.security.config;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -52,10 +53,18 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/api/registration/**").permitAll()
                 .antMatchers(AUTH_WHITELIST).permitAll()
-                .antMatchers("/api/ping").hasAuthority("USER")
+                .antMatchers("/api/registration/**").permitAll()
                 .antMatchers("/api/accounts/**").hasAuthority("ADMIN")
+                .antMatchers("/api/topic/add/**").hasAuthority("ADMIN")
+                .antMatchers(HttpMethod.DELETE, "/api/topic/**").hasAuthority("ADMIN")
+                .antMatchers("/api/topic/**").hasAnyAuthority("USER", "ADMIN")
+                .antMatchers(HttpMethod.GET,"/api/article").hasAnyAuthority("USER", "ADMIN")
+                .antMatchers(HttpMethod.GET, "/api/article/**").hasAnyAuthority("USER", "ADMIN")
+                .antMatchers(HttpMethod.DELETE, "/api/article/**").hasAuthority("ADMIN")
+                .antMatchers(HttpMethod.PUT, "/api/article/add/**").hasAuthority("ADMIN")
+                .antMatchers("/api/questionnaire/**").hasAuthority("USER")
+                .antMatchers("/api/ping").hasAuthority("USER")
                 .anyRequest().authenticated()
                 .and()
                 .addFilter(new JwtAuthenticationFilter(authenticationManager(), jwtConfig, secretKey))
