@@ -1,13 +1,9 @@
 package pl.lodz.p.it.zzpj.entity.user;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import pl.lodz.p.it.zzpj.entity.thesis.Article;
 import pl.lodz.p.it.zzpj.entity.questionnaire.Questionnaire;
 import pl.lodz.p.it.zzpj.service.auth.validator.Email;
 import pl.lodz.p.it.zzpj.service.auth.validator.Firstname;

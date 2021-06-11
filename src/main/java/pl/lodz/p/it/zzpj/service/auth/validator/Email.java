@@ -11,9 +11,9 @@ import java.lang.annotation.Target;
 @Constraint(validatedBy = {})
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
-@Pattern(regexp = RegularExpression.EMAIL, message = "Email does not match pattern requirements")
+@Pattern(regexp = RegularExpression.EMAIL, message = "validation.email.pattern")
 public @interface Email {
-    String message() default "Email is invalid";
+    String message() default "validation.email.pattern";
 
     Class<?>[] groups() default {};
 

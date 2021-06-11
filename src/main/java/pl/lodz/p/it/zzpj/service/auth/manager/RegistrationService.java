@@ -28,17 +28,14 @@ public class RegistrationService {
             token = accountService.singUpUser(newAccount);
         } catch (IllegalStateException illegalStateException) {
             throw new RegistrationException(illegalStateException.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
         }
 
         String link = "http://localhost:8080/api/registration/confirm?token=" + token;
-        emailSender.send(request.getEmail(), getEmailContent(request.getFirstName(), link));
         return token;
     }
 
     @Transactional
-    public String confirmToken(String token) {
+    public String confirmToken(String token) throws IllegalStateException {
         ConfirmationToken confirmationToken = confirmationTokenService.getToken(token)
                 .orElseThrow(() -> new IllegalStateException("token not found"));
 
@@ -55,19 +52,5 @@ public class RegistrationService {
         confirmationTokenService.setConfirmedAt(token);
         accountService.enableUser(confirmationToken.getAccount().getEmail());
         return "confirmed";
-    }
-
-    private String getEmailContent(String name, String link) {
-        return new StringBuilder()
-                .append("<p style=\"Margin:0 0 0px 0;font-size:19px;line-height:25px;color:#0b0c0c\">")
-                .append("Hi ")
-                .append(name)
-                .append(",</p>")
-                .append("<br/>")
-                .append("thank you for registering please click on the link to activate your account: ")
-                .append("<a href=")
-                .append(link)
-                .append(">Activate Now</a>")
-                .toString();
     }
 }

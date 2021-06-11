@@ -11,9 +11,9 @@ import java.lang.annotation.Target;
 @Constraint(validatedBy = {})
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
-@Pattern(regexp = RegularExpression.ROLE, message = "Role does not match size requirements")
+@Pattern(regexp = RegularExpression.ROLE, message = "validation.role.pattern")
 public @interface Role {
-    String message() default "Role is forbidden";
+    String message() default "validation.role.pattern";
 
     Class<?>[] groups() default {};
 
