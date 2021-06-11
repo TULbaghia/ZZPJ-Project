@@ -34,4 +34,10 @@ public class QuestionnaireController {
     public Set<Long> getQuestionnairesForUser() {
         return questionnaireService.getQuestionnaireForUser();
     }
+
+    @PutMapping(path = "/q")
+    @ResponseBody
+    public QuestionnaireDto resolveQuestionnaire(@RequestBody QuestionnaireDto questionnaireDto) {
+        return questionnaireService.solveQuestionnaire(questionnaireDto);
+    }
 }

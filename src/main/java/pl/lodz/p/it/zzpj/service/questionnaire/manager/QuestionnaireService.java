@@ -1,6 +1,7 @@
 package pl.lodz.p.it.zzpj.service.questionnaire.manager;
 
 import lombok.AllArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -9,9 +10,12 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.lodz.p.it.zzpj.entity.questionnaire.Questionnaire;
 import pl.lodz.p.it.zzpj.entity.questionnaire.QuestionnaireQuestion;
 import pl.lodz.p.it.zzpj.entity.user.Account;
+import pl.lodz.p.it.zzpj.exception.AccessDeniedException;
 import pl.lodz.p.it.zzpj.exception.AppBaseException;
+import pl.lodz.p.it.zzpj.exception.QuestionnaireException;
 import pl.lodz.p.it.zzpj.service.auth.repository.AccountRepository;
 import pl.lodz.p.it.zzpj.service.questionnaire.dto.QuestionnaireDto;
+import pl.lodz.p.it.zzpj.service.questionnaire.manager.QuestionService;
 import pl.lodz.p.it.zzpj.service.questionnaire.mapper.IQuestionnaireMapper;
 import pl.lodz.p.it.zzpj.service.questionnaire.repository.QuestionnaireQuestionRepository;
 import pl.lodz.p.it.zzpj.service.questionnaire.repository.QuestionnaireRepository;
@@ -84,5 +88,35 @@ public class QuestionnaireService {
         Questionnaire questionnaire = questionnaireRepository.getById(questionnaireId);
 
         return IQuestionnaireMapper.INSTANCE.toDto(questionnaire);
+    }
+
+    @SneakyThrows
+    public QuestionnaireDto solveQuestionnaire(QuestionnaireDto questionnaireDto) {
+        Questionnaire questionnaire = questionnaireRepository.getById(questionnaireDto.getId());
+
+        for (final QuestionnaireQuestion x : questionnaire.getQuestionnaireQuestions()) {
+            var first = questionnaireDto.getQuestionnaireQuestions()
+                    .stream()
+                    .filter(y -> x.getId().equals(y.getId())).findFirst();
+
+            if (first.isEmpty()) {
+                throw new QuestionnaireException("exception.questionnaire.no_such_question");
+            }
+
+            x.setResponse(first.get().getWord());
+            x.setCorrect(x.getWord().getWord().equalsIgnoreCase(x.getResponse()));
+        }
+
+        questionnaireRepository.saveAndFlush(questionnaire);
+
+        QuestionnaireDto questionnaireDto1 = IQuestionnaireMapper.INSTANCE.toDto(questionnaire);
+        questionnaireDto1.setScore(questionnaire.getQuestionnaireQuestions()
+                .stream()
+                .map(QuestionnaireQuestion::isCorrect)
+                .collect(Collectors.toList())
+                .size()
+        );
+
+        return questionnaireDto1;
     }
 }
