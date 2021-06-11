@@ -16,13 +16,30 @@ import java.util.Set;
 @Transactional(propagation = Propagation.MANDATORY, isolation = Isolation.READ_COMMITTED, rollbackFor = AppBaseException.class)
 public interface ArticleWordRepository extends JpaRepository<ArticleWord, Long> {
 
-    @Query("SELECT aw FROM ArticleWord aw WHERE (aw.article.id) IN (?1)")
-    Set<ArticleWord> getArticleWordsForArticle(Set<Long> ids);
+    @Query(value = "SELECT DISTINCT aw.word_id FROM article_word aw " +
+            "JOIN word w on aw.word_id = w.id " +
+            "WHERE aw.article_id IN (:articleIds) AND w.is_useless = false", nativeQuery = true)
+    Set<Long> findMatchingArticleWord(@Param("articleIds") Set<Long> articleIds);
 
-    @Query("SELECT COUNT (aw) FROM ArticleWord aw WHERE aw.word.id = ?1 AND aw.id NOT IN (?2)")
-    Long getOtherArticleWordsForWord(Long wordId, Set<Long> articleWordIds);
-
-    @Query(value = "SELECT DISTINCT aw.id, aw.word_id FROM article_word aw WHERE aw.article_id IN (:articleIds)", nativeQuery = true)
-    Set<Object[]> findArticleWordsFromArticleIds(@Param("articleIds") Set<Long> articleIds);
+    /**
+     * Pobieramy słowa, które znajdują się w artykułach, które przerzuciliśmy
+     * I ilość wystąpień w innych artykułach tych słów musi być równa null
+     *
+     * @param articleIds lista artykułów
+     * @return lista unikalnych słów dla podanej listy artykułów
+     */
+    @Query(value = "SELECT DISTINCT aw.word_id " +
+            "FROM article_word aw " +
+            "LEFT JOIN (" +
+            "   SELECT DISTINCT aw2.word_id, COUNT(*) as bannedCount " +
+            "   FROM article_word aw2 " +
+            "   WHERE NOT EXISTS ( " +
+            "       SELECT DISTINCT aw3.id" +
+            "       FROM article_word aw3 " +
+            "       WHERE aw3.article_id IN (:articleIds) AND aw2.word_id = aw3.word_id AND aw2.id = aw3.id )" +
+            "   GROUP BY aw2.word_id " +
+            ") aw2 ON aw2.word_id = aw.word_id " +
+            "WHERE aw.article_id IN (:articleIds) AND aw2.bannedCount IS NULL", nativeQuery = true)
+    Set<Long> findArticleWordsFromArticleIds(@Param("articleIds") Set<Long> articleIds);
 
 }
