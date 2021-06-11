@@ -27,9 +27,9 @@ public class ArticleWordService {
 
     private final WordRepository wordRepository;
 
-    @Transactional(propagation = Propagation.MANDATORY, isolation = Isolation.READ_COMMITTED)
-    public void generateForId(Long id) {
-        var article = articleRepository.getById(id);
+    @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED)
+    public void generateForId(Long articleId) {
+        var article = articleRepository.getById(articleId);
         var thesis = article.getThesisAbstract();
         var words = ThesisFilter.filterWord(thesis);
 
@@ -43,19 +43,10 @@ public class ArticleWordService {
                     return new ArticleWord(article, word, entry.getValue());
                 })
                 .collect(Collectors.toList());
-
         articleWordRepository.saveAllAndFlush(articleWords);
     }
 
-    public Set<ArticleWord> getArticleWordsForArticle(Set<Long> ids) {
-        return articleWordRepository.getArticleWordsForArticle(ids);
-    }
-
-    public Long getOtherArticleWordsForWord(Long wordId, Set<Long> articleWordIds) {
-        return articleWordRepository.getOtherArticleWordsForWord(wordId, articleWordIds);
-    }
-
-    public Set<Object[]> findArticleWordsFromArticleIds(Set<Long> articleIds) {
-        return articleWordRepository.findArticleWordsFromArticleIds(articleIds);
+    public Set<Long> findMatchingArticleWord(Set<Long> articleIds) {
+        return articleWordRepository.findMatchingArticleWord(articleIds);
     }
 }

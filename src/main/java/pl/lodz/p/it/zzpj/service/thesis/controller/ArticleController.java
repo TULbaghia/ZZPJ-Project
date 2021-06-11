@@ -34,7 +34,7 @@ public class ArticleController {
 
     @PutMapping(path = "add/{topic}/{start}/{pagination}")
     @ResponseBody
-    public void insertByTopic(@PathVariable @Subject String topic, @PathVariable int start, @PathVariable int pagination) throws AppBaseException {
+    public void insertArticleByTopic(@PathVariable @Subject String topic, @PathVariable int start, @PathVariable int pagination) throws AppBaseException {
         var articleDtoList = articleService.createFromTopic(topic, start, pagination);
         articleDtoList.parallelStream().forEach(x -> {
             try {

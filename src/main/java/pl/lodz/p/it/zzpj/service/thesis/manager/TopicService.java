@@ -36,11 +36,11 @@ public class TopicService {
         topicRepository.deleteById(id);
     }
 
-    public Set<Long> findArticleIdsConnectedWithTopics(Set<Long> topicId) {
-        return topicRepository.findArticleIdsConnectedWithTopics(topicId);
+    public Set<Long> findArticlesIdsByTopics(Set<Long> topicId) {
+        return topicRepository.findArticleIdsByTopics(topicId);
     }
 
-    public Set<Long> findArticleIdsConnectedWithTopicsWithoutBannedArticles(Set<Long> topicIds, Set<Long> bannedArticlesIds) {
-        return topicRepository.findArticleIdsConnectedWithTopicsWithoutBannedArticles(topicIds, bannedArticlesIds);
+    public Set<Long> findFilteredArticleIdsByTopics(Set<Long> topicIds, Set<Long> bannedArticlesIds) {
+        return topicRepository.findFilteredArticleIdsByTopics(topicIds, bannedArticlesIds);
     }
 }
