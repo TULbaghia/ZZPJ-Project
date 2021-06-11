@@ -12,7 +12,7 @@ import java.util.Set;
 @RestController
 @RequestMapping(path = "api/questionnaire")
 @AllArgsConstructor
-@Transactional(propagation = Propagation.REQUIRES_NEW)
+@Transactional(propagation = Propagation.NEVER)
 public class QuestionnaireController {
 
     private final QuestionnaireService questionnaireService;
