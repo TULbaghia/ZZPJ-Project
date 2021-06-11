@@ -12,7 +12,9 @@ import pl.lodz.p.it.zzpj.service.thesis.repository.ArticleRepository;
 import pl.lodz.p.it.zzpj.service.thesis.repository.ArticleWordRepository;
 import pl.lodz.p.it.zzpj.service.thesis.repository.WordRepository;
 import pl.lodz.p.it.zzpj.service.thesis.utils.ThesisFilter;
+import pl.lodz.p.it.zzpj.service.questionnaire.api.TranslationApi;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -26,6 +28,8 @@ public class ArticleWordService {
     private final ArticleWordRepository articleWordRepository;
 
     private final WordRepository wordRepository;
+
+    private final TranslationApi translationApi;
 
     @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED)
     public void generateForId(Long articleId) {
@@ -43,7 +47,34 @@ public class ArticleWordService {
                     return new ArticleWord(article, word, entry.getValue());
                 })
                 .collect(Collectors.toList());
+
+        translateWordsFromArticleWords(articleWords);
+
         articleWordRepository.saveAllAndFlush(articleWords);
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY, isolation = Isolation.READ_COMMITTED)
+    protected void translateWordsFromArticleWords(List<ArticleWord> articleWords) {
+        List<Word> translationWords = articleWords.stream()
+                .map(ArticleWord::getWord)
+                .filter(x -> "".equals(x.getTranslation()) && x.getId() == null && !x.isUseless())
+                .collect(Collectors.toList());
+
+        List<String> translations = translationApi.translateWord(translationWords
+                .stream()
+                .map(Word::getWord)
+                .collect(Collectors.toList())
+        );
+
+        for (int i = 0; i < translationWords.size(); i++) {
+            var word = translationWords.get(i);
+            word.setTranslation(translations.get(i));
+
+            if(word.getWord().equalsIgnoreCase(word.getTranslation())
+                    || word.getTranslation().length() <= 2) {
+                word.setUseless(true);
+            }
+        }
     }
 
     public Set<Long> findMatchingArticleWord(Set<Long> articleIds) {
