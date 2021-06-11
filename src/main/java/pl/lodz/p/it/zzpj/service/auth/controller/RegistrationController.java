@@ -27,8 +27,8 @@ public class RegistrationController {
     @PostMapping(produces = MediaType.APPLICATION_JSON)
     public ResponseEntity register(@RequestBody @Valid RegisterAccountDto request) {
         try {
-            registrationService.register(request);
-            return ResponseEntity.ok().build();
+            String confirmationToken = registrationService.register(request);
+            return ResponseEntity.status(HttpStatus.OK).body(confirmationToken);
         } catch (RegistrationException e) {
             log.warning(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
