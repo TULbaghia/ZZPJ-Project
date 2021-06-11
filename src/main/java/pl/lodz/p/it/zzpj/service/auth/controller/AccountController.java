@@ -36,9 +36,4 @@ public class AccountController {
         accountService.addAdminPermissions(email);
         return Response.ok().build();
     }
-
-//    @PutMapping("/{email}")
-//    public ResponseStatus editAccount(@RequestBody AccountDto accountDto) {
-//
-//    }
 }
