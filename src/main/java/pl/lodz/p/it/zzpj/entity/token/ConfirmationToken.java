@@ -11,8 +11,18 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
+@Table(name = ConfirmationToken.TABLE_NAME, indexes = {
+        @Index(columnList = "id", name = ConfirmationToken.IX_ACCOUNT_ID, unique = true),
+        @Index(columnList = "token", name = ConfirmationToken.IX_UQ_TOKEN, unique = true),
+}, uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"token"}, name = ConfirmationToken.IX_UQ_TOKEN)
+})
 @Entity
 public class ConfirmationToken {
+
+    public static final String TABLE_NAME = "confirmation_token";
+    public static final String IX_ACCOUNT_ID = "ix_account_id";
+    public static final String IX_UQ_TOKEN = "ix_uq_token";
 
     @Id
     @SequenceGenerator(

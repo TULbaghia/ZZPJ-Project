@@ -4,8 +4,11 @@ import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import pl.lodz.p.it.zzpj.entity.thesis.Article;
 import pl.lodz.p.it.zzpj.entity.questionnaire.Questionnaire;
 import pl.lodz.p.it.zzpj.service.auth.validator.Email;
+import pl.lodz.p.it.zzpj.service.auth.validator.Firstname;
+import pl.lodz.p.it.zzpj.service.auth.validator.Lastname;
 import pl.lodz.p.it.zzpj.service.auth.validator.Password;
 
 import javax.persistence.*;
@@ -18,8 +21,18 @@ import java.util.Set;
 @Setter
 @EqualsAndHashCode
 @NoArgsConstructor
+@Table(name = Account.TABLE_NAME, indexes = {
+        @Index(columnList = "id", name = Account.IX_ACCOUNT_ID, unique = true),
+        @Index(columnList = "email", name = Account.IX_UQ_EMAIL, unique = true),
+}, uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"email"}, name = Account.IX_UQ_EMAIL)
+})
 @Entity
 public class Account implements UserDetails {
+
+    public static final String TABLE_NAME = "account";
+    public static final String IX_ACCOUNT_ID = "ix_account_id";
+    public static final String IX_UQ_EMAIL = "ix_uq_email";
 
     @Id
     @SequenceGenerator(
@@ -32,7 +45,9 @@ public class Account implements UserDetails {
             generator = "account_sequence"
     )
     private Long id;
+    @Firstname
     private String firstName;
+    @Lastname
     private String lastName;
     @Email
     private String email;

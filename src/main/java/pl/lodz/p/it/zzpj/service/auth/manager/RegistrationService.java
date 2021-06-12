@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.lodz.p.it.zzpj.entity.token.ConfirmationToken;
 import pl.lodz.p.it.zzpj.entity.user.Account;
 import pl.lodz.p.it.zzpj.entity.user.AccountRole;
+import pl.lodz.p.it.zzpj.exception.RegistrationException;
 import pl.lodz.p.it.zzpj.service.auth.dto.RegisterAccountDto;
 
 import java.time.LocalDateTime;
@@ -17,10 +18,17 @@ public class RegistrationService {
     private final AccountService accountService;
     private final ConfirmationTokenService confirmationTokenService;
 
-    public String register(RegisterAccountDto request) {
-        String token = accountService
-                .singUpUser(new Account(request.getFirstName(), request.getLastName(), request.getEmail(),
-                        request.getPassword(), AccountRole.USER));
+    public String register(RegisterAccountDto request) throws RegistrationException {
+        String token = null;
+        try {
+            Account newAccount = new Account(request.getFirstName(), request.getLastName(), request.getEmail(),
+                    request.getPassword(), AccountRole.USER);
+            token = accountService.singUpUser(newAccount);
+        } catch (IllegalStateException illegalStateException) {
+            throw new RegistrationException(illegalStateException.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return token;
     }
 
