@@ -13,9 +13,9 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 @NotNull
-@Pattern(regexp = ThesisRegularExpression.TOPIC, message = "{validation.topic.pattern}")
+@Pattern(regexp = ThesisRegularExpression.TOPIC, message = "validation.topic.pattern")
 public @interface Subject {
-    String message() default "{validation.topic}";
+    String message() default "validation.topic";
 
     Class<?>[] groups() default {};
 

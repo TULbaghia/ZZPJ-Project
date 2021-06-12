@@ -1,8 +1,11 @@
 package pl.lodz.p.it.zzpj.entity.thesis;
 
 import lombok.*;
+import pl.lodz.p.it.zzpj.entity.questionnaire.QuestionnaireQuestion;
 
 import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @NoArgsConstructor
 @RequiredArgsConstructor
@@ -32,4 +35,13 @@ public class Word {
     @EqualsAndHashCode.Include
     @Column(nullable = false, updatable = false)
     private String word;
+
+    @NonNull
+    private String translation;
+
+    private boolean isUseless = false;
+
+    @ToString.Exclude
+    @OneToMany(mappedBy = "word", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    private Set<QuestionnaireQuestion> questionnaireQuestionSet = new HashSet<>();
 }

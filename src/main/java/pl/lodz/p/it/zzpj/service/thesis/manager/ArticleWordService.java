@@ -12,7 +12,9 @@ import pl.lodz.p.it.zzpj.service.thesis.repository.ArticleRepository;
 import pl.lodz.p.it.zzpj.service.thesis.repository.ArticleWordRepository;
 import pl.lodz.p.it.zzpj.service.thesis.repository.WordRepository;
 import pl.lodz.p.it.zzpj.service.thesis.utils.ThesisFilter;
+import pl.lodz.p.it.zzpj.service.questionnaire.api.TranslationApi;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -27,9 +29,11 @@ public class ArticleWordService {
 
     private final WordRepository wordRepository;
 
-    @Transactional(propagation = Propagation.MANDATORY, isolation = Isolation.READ_COMMITTED)
-    public void generateForId(Long id) {
-        var article = articleRepository.getById(id);
+    private final TranslationApi translationApi;
+
+    @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED)
+    public void generateForId(Long articleId) {
+        var article = articleRepository.getById(articleId);
         var thesis = article.getThesisAbstract();
         var words = ThesisFilter.filterWord(thesis);
 
@@ -38,24 +42,42 @@ public class ArticleWordService {
                 .map((entry) -> {
                     var word = wordRepository.findByWord(entry.getKey());
                     if (word == null) {
-                        word = new Word(entry.getKey());
+                        word = new Word(entry.getKey(), "");
                     }
                     return new ArticleWord(article, word, entry.getValue());
                 })
                 .collect(Collectors.toList());
 
+        translateWordsFromArticleWords(articleWords);
+
         articleWordRepository.saveAllAndFlush(articleWords);
     }
 
-    public Set<ArticleWord> getArticleWordsForArticle(Set<Long> ids) {
-        return articleWordRepository.getArticleWordsForArticle(ids);
+    @Transactional(propagation = Propagation.MANDATORY, isolation = Isolation.READ_COMMITTED)
+    protected void translateWordsFromArticleWords(List<ArticleWord> articleWords) {
+        List<Word> translationWords = articleWords.stream()
+                .map(ArticleWord::getWord)
+                .filter(x -> "".equals(x.getTranslation()) && x.getId() == null && !x.isUseless())
+                .collect(Collectors.toList());
+
+        List<String> translations = translationApi.translateWord(translationWords
+                .stream()
+                .map(Word::getWord)
+                .collect(Collectors.toList())
+        );
+
+        for (int i = 0; i < translationWords.size(); i++) {
+            var word = translationWords.get(i);
+            word.setTranslation(translations.get(i));
+
+            if(word.getWord().equalsIgnoreCase(word.getTranslation())
+                    || word.getTranslation().length() <= 2) {
+                word.setUseless(true);
+            }
+        }
     }
 
-    public Long getOtherArticleWordsForWord(Long wordId, Set<Long> articleWordIds) {
-        return articleWordRepository.getOtherArticleWordsForWord(wordId, articleWordIds);
-    }
-
-    public Set<Object[]> findArticleWordsFromArticleIds(Set<Long> articleIds) {
-        return articleWordRepository.findArticleWordsFromArticleIds(articleIds);
+    public Set<Long> findMatchingArticleWord(Set<Long> articleIds) {
+        return articleWordRepository.findMatchingArticleWord(articleIds);
     }
 }

@@ -1,4 +1,4 @@
-package pl.lodz.p.it.zzpj.service.thesis.repository;
+package pl.lodz.p.it.zzpj.service.questionnaire.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -7,19 +7,16 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import pl.lodz.p.it.zzpj.entity.thesis.Article;
+import pl.lodz.p.it.zzpj.entity.questionnaire.Questionnaire;
+import pl.lodz.p.it.zzpj.entity.user.Account;
 import pl.lodz.p.it.zzpj.exception.AppBaseException;
 
 import java.util.Set;
 
 @Repository
 @Transactional(propagation = Propagation.MANDATORY, isolation = Isolation.READ_COMMITTED, rollbackFor = AppBaseException.class)
-public interface ArticleRepository extends JpaRepository<Article, Long> {
+public interface QuestionnaireRepository extends JpaRepository<Questionnaire, Long> {
 
-    @Query(value = "SELECT DISTINCT t.id FROM article a " +
-            "JOIN topic_article ta on a.id = ta.article_id " +
-            "JOIN topic t on ta.topic_id = t.id " +
-            "WHERE a.id IN (:articleIds) AND t.id NOT IN (:bannedTopicIds)"
-            , nativeQuery = true)
-    Set<Long> findNotBannedTopicIdsFromArticleIds(@Param("articleIds") Set<Long> articleIds, @Param("bannedTopicIds") Set<Long> bannedTopicIds);
+    @Query("SELECT q.id FROM Questionnaire q WHERE q.account = :account")
+    Set<Long> findByAccount(@Param("account") Account account);
 }

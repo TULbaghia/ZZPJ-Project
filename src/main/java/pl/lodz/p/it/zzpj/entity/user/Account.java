@@ -1,13 +1,11 @@
 package pl.lodz.p.it.zzpj.entity.user;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import pl.lodz.p.it.zzpj.entity.thesis.Article;
+import pl.lodz.p.it.zzpj.entity.questionnaire.Questionnaire;
 import pl.lodz.p.it.zzpj.service.auth.validator.Email;
 import pl.lodz.p.it.zzpj.service.auth.validator.Firstname;
 import pl.lodz.p.it.zzpj.service.auth.validator.Lastname;
@@ -16,6 +14,8 @@ import pl.lodz.p.it.zzpj.service.auth.validator.Password;
 import javax.persistence.*;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -101,4 +101,8 @@ public class Account implements UserDetails {
     public boolean isEnabled() {
         return enabled;
     }
+
+    @ToString.Exclude
+    @OneToMany(mappedBy = "account", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    private Set<Questionnaire> questionnaires = new HashSet<>();
 }

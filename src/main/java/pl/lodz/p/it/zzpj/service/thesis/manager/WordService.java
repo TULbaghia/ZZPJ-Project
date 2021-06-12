@@ -11,7 +11,7 @@ import pl.lodz.p.it.zzpj.service.thesis.repository.WordRepository;
 
 @Service
 @AllArgsConstructor
-@Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED, rollbackFor = AppBaseException.class)
+@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED, rollbackFor = AppBaseException.class)
 public class WordService {
 
     private final WordRepository wordRepository;
