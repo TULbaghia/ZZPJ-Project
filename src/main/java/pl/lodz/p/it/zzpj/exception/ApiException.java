@@ -1,8 +1,10 @@
 package pl.lodz.p.it.zzpj.exception;
 
 public class ApiException extends AppBaseException {
+    private static final String API_EXCEPTION = "exception.execution_error";
+
     public ApiException() {
-        super();
+        super(API_EXCEPTION);
     }
 
     public ApiException(String message) {

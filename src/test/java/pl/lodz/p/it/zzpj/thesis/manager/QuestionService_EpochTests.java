@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
+import pl.lodz.p.it.zzpj.exception.NoRecordsException;
 import pl.lodz.p.it.zzpj.service.questionnaire.manager.QuestionService;
 
 @SpringBootTest
@@ -18,7 +19,7 @@ public class QuestionService_EpochTests {
 
     @Test
     @Order(0)
-    public void shouldReturnDirectlyConnectedTopics() {
+    public void shouldReturnDirectlyConnectedTopics() throws NoRecordsException {
         long startTopic = 1;
 
         var topArticles = questionService.getArticlesConnectedWithTopic(startTopic, 0);
@@ -31,7 +32,7 @@ public class QuestionService_EpochTests {
 
     @Test
     @Order(1)
-    public void shouldReturnDirectlyConnectedTopic() {
+    public void shouldReturnDirectlyConnectedTopic() throws NoRecordsException {
         long startTopic = 6;
 
         var topArticles = questionService.getArticlesConnectedWithTopic(startTopic, 0);
@@ -43,7 +44,7 @@ public class QuestionService_EpochTests {
 
     @Test
     @Order(2)
-    public void shouldAlsoReturnTopicsFromEpoch1() {
+    public void shouldAlsoReturnTopicsFromEpoch1() throws NoRecordsException {
         long startTopic = 1;
 
         var topArticles = questionService.getArticlesConnectedWithTopic(startTopic, 1);

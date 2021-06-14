@@ -19,14 +19,30 @@ public interface IQuestionnaireMapper {
 
     QuestionnaireDto toDto(Questionnaire questionnaire);
 
+    QuestionnaireDto toPlainDto(QuestionnaireDto questionnaireDto);
+
     @Mappings({
             @Mapping(target = "word", source = "word.word"),
-            @Mapping(target = "userTranslation", source = "response")
+            @Mapping(target = "userTranslation", source = "response"),
+            @Mapping(target = "correctTranslation", source = "word.translation"),
     })
     QuestionnaireQuestionDto toDto(QuestionnaireQuestion questionnaireQuestion);
 
-    default Set<QuestionnaireQuestionDto> map(Set<QuestionnaireQuestion> questionnaireQuestions) {
+    @Mappings({
+            @Mapping(target = "userTranslation", ignore = true),
+            @Mapping(target = "correctTranslation", ignore = true),
+    })
+    QuestionnaireQuestionDto toDto(QuestionnaireQuestionDto questionnaireQuestion);
+
+    default Set<QuestionnaireQuestionDto> map1(Set<QuestionnaireQuestion> questionnaireQuestions) {
         return questionnaireQuestions
+                .stream()
+                .map(IQuestionnaireMapper.INSTANCE::toDto)
+                .collect(Collectors.toSet());
+    }
+
+    default Set<QuestionnaireQuestionDto> map2(Set<QuestionnaireQuestionDto> questionnaireQuestionsDto) {
+        return questionnaireQuestionsDto
                 .stream()
                 .map(IQuestionnaireMapper.INSTANCE::toDto)
                 .collect(Collectors.toSet());

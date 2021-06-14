@@ -59,6 +59,9 @@ public interface IArticleMapper {
 
     ArticleDto toArticleDto(Article article);
 
+    @Mapping(target = "thesisAbstract", ignore = true)
+    ArticleDto toArticleDto_NoDescription(Article article);
+
     default List<String> map(Set<Topic> topicSet) {
         return topicSet.stream()
                 .map(Topic::getName)

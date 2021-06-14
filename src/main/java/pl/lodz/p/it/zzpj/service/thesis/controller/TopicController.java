@@ -4,10 +4,12 @@ import lombok.AllArgsConstructor;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import pl.lodz.p.it.zzpj.exception.NoRecordsException;
 import pl.lodz.p.it.zzpj.service.thesis.dto.TopicDto;
 import pl.lodz.p.it.zzpj.service.thesis.manager.TopicService;
 import pl.lodz.p.it.zzpj.service.thesis.mapper.ITopicMapper;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,13 +23,13 @@ public class TopicController {
 
     @PostMapping(path = "/add/{name}")
     @ResponseBody
-    public TopicDto addTopic(@PathVariable String name) {
+    public TopicDto addTopic(@NotNull @PathVariable String name) {
         return ITopicMapper.INSTANCE.toTopicDto(topicService.addTopic(name));
     }
 
     @GetMapping(path = "{id}")
     @ResponseBody
-    public TopicDto getTopic(@PathVariable Long id) {
+    public TopicDto getTopic(@NotNull @PathVariable Long id) throws NoRecordsException {
         return ITopicMapper.INSTANCE.toTopicDto(topicService.getTopic(id));
     }
 
@@ -40,11 +42,9 @@ public class TopicController {
                 .collect(Collectors.toList());
     }
 
-    // TODO: update - NO?
-
     @DeleteMapping(path = "/{id}")
     @ResponseBody
-    public void deleteTopic(@PathVariable Long id) {
+    public void deleteTopic(@NotNull @PathVariable Long id) {
         topicService.deleteTopic(id);
     }
 }
