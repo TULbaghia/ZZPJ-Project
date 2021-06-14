@@ -192,7 +192,7 @@ public class QuestionnaireServiceTests {
 
         QuestionnaireDto qDto = IQuestionnaireMapper.INSTANCE.toDto(questionnaire);
         SecurityContextHolder.getContext().setAuthentication(new TestSecurityContext());
-        qDto.getQuestionnaireQuestions().removeIf(x -> x.getId().equals(2L));
+        qDto.getQuestionnaireQuestions().removeIf(x -> x.getId().equals(qq1.getId()));
 
         var exception = Assertions.assertThrows(QuestionnaireException.class,
                 () -> questionnaireService.solveQuestionnaire(qDto));
