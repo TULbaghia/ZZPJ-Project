@@ -9,6 +9,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import pl.lodz.p.it.zzpj.service.auth.security.jwt.JwtConfig;
 
 import javax.crypto.SecretKey;
 import javax.servlet.FilterChain;
@@ -39,6 +40,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             return authenticationManager.authenticate(authentication);
 
         } catch (IOException e) {
+            log.info("Exception occurred: " + e.getClass());
             throw new RuntimeException(e);
         }
     }
@@ -56,6 +58,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .compact();
 
         response.addHeader(jwtConfig.getAuthorizationHeader(), jwtConfig.getTokenPrefix() + " " + token);
+
     }
 
 }

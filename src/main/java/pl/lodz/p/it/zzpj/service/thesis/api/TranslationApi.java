@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import lombok.AllArgsConstructor;
+import lombok.extern.java.Log;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -18,6 +19,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+@Log
 @Service
 @AllArgsConstructor
 public class TranslationApi {
@@ -53,10 +55,12 @@ public class TranslationApi {
 
             var responseEntity = restTemplate.postForEntity(URL_API_VERSION, request, String.class);
             if (!responseEntity.getStatusCode().is2xxSuccessful()) {
+                log.info("Response entity is not 2xx");
                 throw new RestClientException("Response entity is not 2xx");
             }
             return JsonParser.parseString(Objects.requireNonNull(responseEntity.getBody())).getAsJsonObject();
         } catch (RestClientException e) {
+            log.info("Exception occurred: " + e.getClass());
             throw new ApiException(e.getCause());
         }
     }

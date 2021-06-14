@@ -1,13 +1,15 @@
 package pl.lodz.p.it.zzpj.service.auth.security.jwt;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.extern.java.Log;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -25,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Log
 @AllArgsConstructor
 public class JwtTokenVerifier extends OncePerRequestFilter {
 
@@ -64,10 +67,14 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
                     new UsernamePasswordAuthenticationToken(username, null, simpleGrantedAuthorities);
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
-        } catch (JwtException e) {
-            throw new IllegalStateException(String.format("Token %s cannot be trusted", token));
-        }
 
+        } catch (ExpiredJwtException e) {
+            response.sendError(400, e.getMessage());
+            log.info(String.format("Token %s expired", token));
+        } catch (JwtException e) {
+            response.sendError(400, e.getMessage());
+            log.info(String.format("Jwt Exception: %s ", e.getClass()));
+        }
         filterChain.doFilter(request, response);
     }
 }

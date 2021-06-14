@@ -26,8 +26,11 @@ import javax.crypto.SecretKey;
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final AccountService accountService;
+
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
     private final JwtConfig jwtConfig;
+
     private final SecretKey secretKey;
 
     private static final String[] AUTH_WHITELIST = {

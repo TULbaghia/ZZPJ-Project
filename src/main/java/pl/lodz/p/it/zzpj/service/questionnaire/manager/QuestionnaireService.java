@@ -2,6 +2,7 @@ package pl.lodz.p.it.zzpj.service.questionnaire.manager;
 
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.java.Log;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -23,6 +24,7 @@ import javax.ws.rs.NotFoundException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Log
 @Service
 @AllArgsConstructor
 @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED, rollbackFor = AppBaseException.class)
@@ -98,10 +100,12 @@ public class QuestionnaireService {
         Questionnaire questionnaire = questionnaireRepository.getById(questionnaireDto.getId());
 
         if (!questionnaire.getAccount().equals(account)) {
+            log.info("Exception access denied");
             throw new AccessDeniedException("exception.access.denied");
         }
 
         if (questionnaire.isSolved()) {
+            log.info("Already solved");
             throw new AccessDeniedException("exception.already_solved");
         }
 
@@ -111,6 +115,7 @@ public class QuestionnaireService {
                     .filter(y -> x.getId().equals(y.getId())).findFirst();
 
             if (first.isEmpty()) {
+                log.info("No such question");
                 throw new QuestionnaireException("exception.questionnaire.no_such_question");
             }
 
