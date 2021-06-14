@@ -3,6 +3,7 @@ package pl.lodz.p.it.zzpj.service.thesis.api;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.AllArgsConstructor;
+import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -15,6 +16,7 @@ import pl.lodz.p.it.zzpj.service.thesis.validator.Doi;
 import java.util.List;
 import java.util.Objects;
 
+@Log
 @Service
 @AllArgsConstructor
 public class NatureApi {
@@ -39,10 +41,12 @@ public class NatureApi {
         try {
             var responseEntity = restTemplate.getForEntity(url, String.class);
             if (!responseEntity.getStatusCode().is2xxSuccessful()) {
+                log.info("Response entity is not 2xx");
                 throw new RestClientException("Response entity is not 2xx");
             }
             return JsonParser.parseString(Objects.requireNonNull(responseEntity.getBody())).getAsJsonObject();
         } catch (RestClientException e) {
+            log.info("Exception occurred: " + e.getClass());
             throw new ApiException(e.getCause());
         }
     }

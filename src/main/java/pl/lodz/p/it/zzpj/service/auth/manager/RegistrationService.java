@@ -1,6 +1,7 @@
 package pl.lodz.p.it.zzpj.service.auth.manager;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.lodz.p.it.zzpj.entity.token.ConfirmationToken;
@@ -11,6 +12,7 @@ import pl.lodz.p.it.zzpj.service.auth.dto.RegisterAccountDto;
 
 import java.time.LocalDateTime;
 
+@Log
 @Service
 @AllArgsConstructor
 public class RegistrationService {
@@ -25,6 +27,7 @@ public class RegistrationService {
                     request.getPassword(), AccountRole.USER);
             token = accountService.singUpUser(newAccount);
         } catch (IllegalStateException illegalStateException) {
+            log.info("Exception occurred: " + illegalStateException.getClass());
             throw new RegistrationException(illegalStateException.getMessage());
         }
         return token;
@@ -36,12 +39,14 @@ public class RegistrationService {
                 .orElseThrow(() -> new IllegalStateException("token not found"));
 
         if (confirmationToken.getConfirmedAt() != null) {
+            log.info("Email already confirmed");
             throw new IllegalStateException("email already confirmed");
         }
 
         LocalDateTime expiredAt = confirmationToken.getExpiresAt();
 
         if (expiredAt.isBefore(LocalDateTime.now())) {
+            log.info("Token expired");
             throw new IllegalStateException("token expired");
         }
 

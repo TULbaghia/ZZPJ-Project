@@ -1,6 +1,7 @@
 package pl.lodz.p.it.zzpj.service.auth.manager;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.java.Log;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -17,6 +18,7 @@ import java.util.UUID;
 
 @Service
 @AllArgsConstructor
+@Log
 public class AccountService implements UserDetailsService {
 
     private final static String USER_NOT_FOUND_MSG = "user with email %s not found";
@@ -45,6 +47,7 @@ public class AccountService implements UserDetailsService {
                 .findByEmail(account.getEmail())
                 .isPresent();
         if (userExists) {
+            log.info("Email already taken: " + account.getEmail());
             throw new IllegalStateException(String.format("Email: '%s' already taken", account.getEmail()));
         }
 
