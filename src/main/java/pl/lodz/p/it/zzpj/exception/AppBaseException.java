@@ -1,7 +1,10 @@
 package pl.lodz.p.it.zzpj.exception;
 
 public class AppBaseException extends Exception {
+    private static final String APP_BASE_EXCEPTION = "exception.app_error";
+
     public AppBaseException() {
+        super(APP_BASE_EXCEPTION);
     }
 
     public AppBaseException(String message) {

@@ -1,8 +1,10 @@
 package pl.lodz.p.it.zzpj.exception;
 
 public class AccessDeniedException extends AppBaseException {
+    private static final String ACCESS_DENIED = "exception.forbidden";
+
     public AccessDeniedException() {
-        super();
+        super(ACCESS_DENIED);
     }
 
     public AccessDeniedException(String message) {

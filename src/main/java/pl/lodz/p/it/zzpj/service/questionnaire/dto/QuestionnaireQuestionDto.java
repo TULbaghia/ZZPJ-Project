@@ -14,4 +14,7 @@ public class QuestionnaireQuestionDto {
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private String userTranslation;
+
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private String correctTranslation;
 }

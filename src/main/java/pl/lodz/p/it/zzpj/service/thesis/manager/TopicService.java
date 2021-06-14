@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import pl.lodz.p.it.zzpj.entity.thesis.Topic;
 import pl.lodz.p.it.zzpj.exception.AppBaseException;
+import pl.lodz.p.it.zzpj.exception.NoRecordsException;
 import pl.lodz.p.it.zzpj.service.thesis.repository.TopicRepository;
 
 import java.util.List;
@@ -24,8 +25,8 @@ public class TopicService {
         return topicRepository.save(topic);
     }
 
-    public Topic getTopic(Long id) {
-        return topicRepository.getById(id);
+    public Topic getTopic(Long id) throws NoRecordsException {
+        return topicRepository.findById(id).orElseThrow(NoRecordsException::new);
     }
 
     public List<Topic> getAllTopics() {

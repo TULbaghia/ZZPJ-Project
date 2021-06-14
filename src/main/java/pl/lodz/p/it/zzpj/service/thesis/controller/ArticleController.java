@@ -13,6 +13,7 @@ import pl.lodz.p.it.zzpj.service.thesis.mapper.IArticleMapper;
 import pl.lodz.p.it.zzpj.service.thesis.validator.Doi;
 import pl.lodz.p.it.zzpj.service.thesis.validator.Subject;
 
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.QueryParam;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,15 +27,15 @@ public class ArticleController {
 
     private final ArticleService articleService;
 
-    @PutMapping(path = "add/doi")
+    @PutMapping(path = "add/byDoi")
     @ResponseBody
-    public void insertByDoi(@QueryParam("doi") @Doi String doi) throws AppBaseException {
+    public void insertByDoi(@NotNull @QueryParam("doi") @Doi String doi) throws AppBaseException {
         articleService.createFromDoi(doi);
     }
 
     @PutMapping(path = "add/{topic}/{start}/{pagination}")
     @ResponseBody
-    public void insertArticleByTopic(@PathVariable @Subject String topic, @PathVariable int start, @PathVariable int pagination) throws AppBaseException {
+    public void insertArticleByTopic(@NotNull @PathVariable @Subject String topic, @PathVariable int start, @PathVariable int pagination) throws AppBaseException {
         var articleDtoList = articleService.createFromTopic(topic, start, pagination);
         articleDtoList.parallelStream().forEach(x -> {
             try {
@@ -47,7 +48,7 @@ public class ArticleController {
 
     @GetMapping(path = "{id}")
     @ResponseBody
-    public ArticleDto getArticle(@PathVariable Long id) {
+    public ArticleDto getArticle(@NotNull @PathVariable Long id) {
         return IArticleMapper.INSTANCE.toArticleDto(articleService.getArticle(id));
     }
 
@@ -56,19 +57,13 @@ public class ArticleController {
     public List<ArticleDto> getAllArticle() {
         return articleService.getAllArticle()
                 .stream()
-                .filter(x -> {
-                    x.setThesisAbstract("");
-                    return true;
-                })
-                .map(IArticleMapper.INSTANCE::toArticleDto)
+                .map(IArticleMapper.INSTANCE::toArticleDto_NoDescription)
                 .collect(Collectors.toList());
     }
 
-    //TODO: update - NO?
-
     @DeleteMapping(path = "{id}")
     @ResponseBody
-    public void deleteArticle(@PathVariable Long id) {
+    public void deleteArticle(@NotNull @PathVariable Long id) {
         articleService.delete(id);
     }
 

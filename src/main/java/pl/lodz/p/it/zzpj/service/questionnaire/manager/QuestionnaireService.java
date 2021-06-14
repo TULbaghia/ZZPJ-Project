@@ -10,9 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.lodz.p.it.zzpj.entity.questionnaire.Questionnaire;
 import pl.lodz.p.it.zzpj.entity.questionnaire.QuestionnaireQuestion;
 import pl.lodz.p.it.zzpj.entity.user.Account;
-import pl.lodz.p.it.zzpj.exception.AccessDeniedException;
-import pl.lodz.p.it.zzpj.exception.AppBaseException;
-import pl.lodz.p.it.zzpj.exception.QuestionnaireException;
+import pl.lodz.p.it.zzpj.exception.*;
 import pl.lodz.p.it.zzpj.service.auth.repository.AccountRepository;
 import pl.lodz.p.it.zzpj.service.questionnaire.dto.QuestionnaireDto;
 import pl.lodz.p.it.zzpj.service.questionnaire.manager.QuestionService;
@@ -21,6 +19,7 @@ import pl.lodz.p.it.zzpj.service.questionnaire.repository.QuestionnaireQuestionR
 import pl.lodz.p.it.zzpj.service.questionnaire.repository.QuestionnaireRepository;
 import pl.lodz.p.it.zzpj.service.thesis.manager.WordService;
 
+import javax.ws.rs.NotFoundException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -38,7 +37,7 @@ public class QuestionnaireService {
     private final QuestionnaireRepository questionnaireRepository;
     private final AccountRepository accountRepository;
 
-    public QuestionnaireDto getQuestions(Long topicId) {
+    public QuestionnaireDto getQuestions(Long topicId) throws NoRecordsException {
         var topArticles = questionService.getArticlesConnectedWithTopic(topicId, EPOCHS_NUMBER);
 
         var wordIdsWithEpochPriority = questionService.getWordsIdsByArticles(topArticles);
@@ -46,35 +45,37 @@ public class QuestionnaireService {
         String emailPrincipal = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
 
         Account account = accountRepository.findByEmail(emailPrincipal).orElseThrow();
+
         Questionnaire questionnaire = new Questionnaire(account);
-
-        List<QuestionnaireQuestion> initMe =
-                wordIdsWithEpochPriority
-                        .stream()
-                        .map(x -> {
-                            var list = new ArrayList<>(x);
-                            Collections.shuffle(list);
-                            return list;
-                        })
-                        .flatMap(Collection::stream)
-                        .limit(RETURN_SIZE)
-                        .map(wordService::getWord)
-                        .map(word -> {
-                            Long id = word.getId();
-                            if (id > 0) {
-                                return new QuestionnaireQuestion(questionnaire, word);
-                            }
-                            return null;
-                        })
-                        .collect(Collectors.toList());
-
-        questionRepository.saveAllAndFlush(initMe);
-
+        List<QuestionnaireQuestion> initMe = getQuestionnaireQuestions(wordIdsWithEpochPriority, questionnaire);
         questionnaire.setQuestionnaireQuestions(new HashSet<>(initMe));
-
         questionnaireRepository.saveAndFlush(questionnaire);
 
-        return IQuestionnaireMapper.INSTANCE.toDto(questionnaire);
+        var questionnaireDto = IQuestionnaireMapper.INSTANCE.toDto(questionnaire);
+
+        return IQuestionnaireMapper.INSTANCE.toPlainDto(questionnaireDto);
+    }
+
+    private List<QuestionnaireQuestion> getQuestionnaireQuestions(List<Set<Long>> wordIdsWithEpochPriority, Questionnaire questionnaire) {
+        List<QuestionnaireQuestion> initMe =
+            wordIdsWithEpochPriority
+                .stream()
+                .map(x -> {
+                    var list = new ArrayList<>(x);
+                    Collections.shuffle(list);
+                    return list;
+                })
+                .flatMap(Collection::stream)
+                .limit(RETURN_SIZE)
+                .map(wordService::getWord)
+                .map(word -> {
+                    Long id = word.getId();
+                    return new QuestionnaireQuestion(questionnaire, word);
+                })
+                .collect(Collectors.toList());
+
+        questionRepository.saveAllAndFlush(initMe);
+        return initMe;
     }
 
     public Set<Long> getQuestionnaireForUser() {
@@ -84,14 +85,13 @@ public class QuestionnaireService {
         return questionnaireRepository.findByAccount(account);
     }
 
-    public QuestionnaireDto getQuestionnaire(Long questionnaireId) {
-        Questionnaire questionnaire = questionnaireRepository.getById(questionnaireId);
+    public QuestionnaireDto getQuestionnaire(Long questionnaireId) throws AppBaseException {
+        var questionnaire = questionnaireRepository.findById(questionnaireId);
 
-        return IQuestionnaireMapper.INSTANCE.toDto(questionnaire);
+        return IQuestionnaireMapper.INSTANCE.toDto(questionnaire.orElseThrow(NoRecordsException::new));
     }
 
-    @SneakyThrows
-    public QuestionnaireDto solveQuestionnaire(QuestionnaireDto questionnaireDto) {
+    public QuestionnaireDto solveQuestionnaire(QuestionnaireDto questionnaireDto) throws AppBaseException {
         String emailPrincipal = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
 
         Account account = accountRepository.findByEmail(emailPrincipal).orElseThrow();
@@ -99,6 +99,10 @@ public class QuestionnaireService {
 
         if (!questionnaire.getAccount().equals(account)) {
             throw new AccessDeniedException("exception.access.denied");
+        }
+
+        if (questionnaire.isSolved()) {
+            throw new AccessDeniedException("exception.already_solved");
         }
 
         for (final QuestionnaireQuestion x : questionnaire.getQuestionnaireQuestions()) {
@@ -115,6 +119,7 @@ public class QuestionnaireService {
             x.setCorrect(x.getWord().getTranslation().equalsIgnoreCase(x.getResponse()));
         }
 
+        questionnaire.setSolved(true);
         questionnaireRepository.saveAndFlush(questionnaire);
 
         QuestionnaireDto questionnaireDto1 = IQuestionnaireMapper.INSTANCE.toDto(questionnaire);
@@ -126,5 +131,17 @@ public class QuestionnaireService {
         );
 
         return questionnaireDto1;
+    }
+
+    public void banQuestionRelatedWord(Long questionId) throws AppBaseException {
+        var question = questionRepository.findById(questionId).orElseThrow(NoRecordsException::new);
+
+        if (question.getWord().isUseless()) {
+            throw WordException.alreadyBanned();
+        }
+
+        question.getWord().setUseless(true);
+
+        questionRepository.saveAndFlush(question);
     }
 }

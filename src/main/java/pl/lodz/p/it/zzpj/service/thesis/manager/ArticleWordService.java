@@ -7,12 +7,13 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import pl.lodz.p.it.zzpj.entity.thesis.ArticleWord;
 import pl.lodz.p.it.zzpj.entity.thesis.Word;
+import pl.lodz.p.it.zzpj.exception.ApiException;
 import pl.lodz.p.it.zzpj.exception.AppBaseException;
 import pl.lodz.p.it.zzpj.service.thesis.repository.ArticleRepository;
 import pl.lodz.p.it.zzpj.service.thesis.repository.ArticleWordRepository;
 import pl.lodz.p.it.zzpj.service.thesis.repository.WordRepository;
 import pl.lodz.p.it.zzpj.service.thesis.utils.ThesisFilter;
-import pl.lodz.p.it.zzpj.service.questionnaire.api.TranslationApi;
+import pl.lodz.p.it.zzpj.service.thesis.api.TranslationApi;
 
 import java.util.List;
 import java.util.Set;
@@ -20,7 +21,7 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
-@Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED, rollbackFor = AppBaseException.class)
+@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED, rollbackFor = AppBaseException.class)
 public class ArticleWordService {
 
     private final ArticleRepository articleRepository;
@@ -31,8 +32,7 @@ public class ArticleWordService {
 
     private final TranslationApi translationApi;
 
-    @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED)
-    public void generateForId(Long articleId) {
+    public void generateForId(Long articleId) throws ApiException {
         var article = articleRepository.getById(articleId);
         var thesis = article.getThesisAbstract();
         var words = ThesisFilter.filterWord(thesis);
@@ -53,14 +53,15 @@ public class ArticleWordService {
         articleWordRepository.saveAllAndFlush(articleWords);
     }
 
-    @Transactional(propagation = Propagation.MANDATORY, isolation = Isolation.READ_COMMITTED)
-    protected void translateWordsFromArticleWords(List<ArticleWord> articleWords) {
-        List<Word> translationWords = articleWords.stream()
+    protected void translateWordsFromArticleWords(List<ArticleWord> articleWords) throws ApiException {
+        List<Word> translationWords = articleWords
+                .stream()
                 .map(ArticleWord::getWord)
                 .filter(x -> "".equals(x.getTranslation()) && x.getId() == null && !x.isUseless())
                 .collect(Collectors.toList());
 
-        List<String> translations = translationApi.translateWord(translationWords
+        List<String> translations = translationApi.translateWord(
+                translationWords
                 .stream()
                 .map(Word::getWord)
                 .collect(Collectors.toList())
@@ -70,8 +71,7 @@ public class ArticleWordService {
             var word = translationWords.get(i);
             word.setTranslation(translations.get(i));
 
-            if(word.getWord().equalsIgnoreCase(word.getTranslation())
-                    || word.getTranslation().length() <= 2) {
+            if(word.getWord().equalsIgnoreCase(word.getTranslation()) || word.getTranslation().length() <= 2) {
                 word.setUseless(true);
             }
         }

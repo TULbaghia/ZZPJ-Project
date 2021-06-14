@@ -4,9 +4,12 @@ import lombok.AllArgsConstructor;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import pl.lodz.p.it.zzpj.exception.AppBaseException;
+import pl.lodz.p.it.zzpj.exception.NoRecordsException;
 import pl.lodz.p.it.zzpj.service.questionnaire.dto.QuestionnaireDto;
 import pl.lodz.p.it.zzpj.service.questionnaire.manager.QuestionnaireService;
 
+import javax.validation.constraints.NotNull;
 import java.util.Set;
 
 @RestController
@@ -19,13 +22,13 @@ public class QuestionnaireController {
 
     @GetMapping(path = "{topicId}")
     @ResponseBody
-    public QuestionnaireDto createQuestionnaireForTopic(@PathVariable Long topicId) {
+    public QuestionnaireDto createQuestionnaireForTopic(@NotNull @PathVariable Long topicId) throws NoRecordsException {
         return questionnaireService.getQuestions(topicId);
     }
 
     @GetMapping(path = "/q/{questionnaireId}")
     @ResponseBody
-    public QuestionnaireDto getQuestionnaireById(@PathVariable Long questionnaireId) {
+    public QuestionnaireDto getQuestionnaireById(@NotNull @PathVariable Long questionnaireId) throws AppBaseException {
         return questionnaireService.getQuestionnaire(questionnaireId);
     }
 
@@ -37,7 +40,12 @@ public class QuestionnaireController {
 
     @PutMapping(path = "/q")
     @ResponseBody
-    public QuestionnaireDto resolveQuestionnaire(@RequestBody QuestionnaireDto questionnaireDto) {
+    public QuestionnaireDto resolveQuestionnaire(@NotNull @RequestBody QuestionnaireDto questionnaireDto) throws AppBaseException {
         return questionnaireService.solveQuestionnaire(questionnaireDto);
+    }
+
+    @PatchMapping(path = "/ban/{questionId}")
+    public void banQuestionRelatedWord(@NotNull @PathVariable Long questionId) throws AppBaseException {
+        questionnaireService.banQuestionRelatedWord(questionId);
     }
 }

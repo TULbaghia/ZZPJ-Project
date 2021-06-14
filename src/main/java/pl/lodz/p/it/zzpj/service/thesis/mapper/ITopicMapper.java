@@ -14,6 +14,5 @@ public interface ITopicMapper {
     @Mapping(target = "articleList", ignore = true)
     Topic toTopic(TopicDto topicDto);
 
-
     TopicDto toTopicDto(Topic topic);
 }

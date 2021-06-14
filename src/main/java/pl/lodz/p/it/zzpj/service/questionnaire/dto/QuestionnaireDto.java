@@ -16,5 +16,7 @@ public class QuestionnaireDto {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private Integer score;
 
+    private boolean isSolved;
+
     Set<QuestionnaireQuestionDto> questionnaireQuestions;
 }

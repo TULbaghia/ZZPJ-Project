@@ -34,6 +34,8 @@ public class Questionnaire {
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 
+    private boolean isSolved = false;
+
     @ToString.Exclude
     @OneToMany(mappedBy = "questionnaire", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private Set<QuestionnaireQuestion> questionnaireQuestions = new HashSet<>();

@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import pl.lodz.p.it.zzpj.exception.AppBaseException;
+import pl.lodz.p.it.zzpj.exception.NoRecordsException;
 import pl.lodz.p.it.zzpj.service.thesis.manager.ArticleService;
 import pl.lodz.p.it.zzpj.service.thesis.manager.ArticleWordService;
 import pl.lodz.p.it.zzpj.service.thesis.manager.TopicService;
@@ -25,11 +26,12 @@ public class QuestionService {
     private final ArticleService articleService;
     private final ArticleWordService articleWordService;
 
-    public List<Set<Long>> getArticlesConnectedWithTopic(final Long topicId, final int epoch) {
+    public List<Set<Long>> getArticlesConnectedWithTopic(final Long topicId, final int epoch) throws NoRecordsException {
+        var topic = topicService.getTopic(topicId);
         //Przechowuje listę epok zawierających zbiór artykułów pobranych w danej epoce
         List<Set<Long>> topArticles = new ArrayList<>();
         // Pobieranie artykułów bezpośrednio powiązanych z przekazanym tematem
-        topArticles.add(topicService.findArticlesIdsByTopics(Set.of(topicId)));
+        topArticles.add(topicService.findArticlesIdsByTopics(Set.of(topic.getId())));
 
         // Przechowuje tematy wykorzystane w poprzednich epokach
         Set<Long> usedTopics = new HashSet<>();
