@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import pl.lodz.p.it.zzpj.exception.NoRecordsException;
+import pl.lodz.p.it.zzpj.exception.TopicException;
 import pl.lodz.p.it.zzpj.service.thesis.dto.TopicDto;
 import pl.lodz.p.it.zzpj.service.thesis.manager.TopicService;
 import pl.lodz.p.it.zzpj.service.thesis.mapper.ITopicMapper;
@@ -23,7 +24,7 @@ public class TopicController {
 
     @PostMapping(path = "/add/{name}")
     @ResponseBody
-    public TopicDto addTopic(@NotNull @PathVariable String name) {
+    public TopicDto addTopic(@NotNull @PathVariable String name) throws TopicException {
         return ITopicMapper.INSTANCE.toTopicDto(topicService.addTopic(name));
     }
 

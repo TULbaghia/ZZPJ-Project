@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import pl.lodz.p.it.zzpj.entity.thesis.Article;
 import pl.lodz.p.it.zzpj.entity.thesis.ArticleWord;
 import pl.lodz.p.it.zzpj.entity.thesis.Word;
 import pl.lodz.p.it.zzpj.exception.ApiException;

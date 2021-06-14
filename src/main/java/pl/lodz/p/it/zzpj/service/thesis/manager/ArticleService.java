@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import pl.lodz.p.it.zzpj.entity.thesis.Article;
+import pl.lodz.p.it.zzpj.entity.thesis.ArticleWord;
 import pl.lodz.p.it.zzpj.entity.thesis.Topic;
 import pl.lodz.p.it.zzpj.exception.AppBaseException;
 import pl.lodz.p.it.zzpj.service.thesis.api.NatureApi;
