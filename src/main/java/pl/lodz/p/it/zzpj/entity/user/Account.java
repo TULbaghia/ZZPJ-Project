@@ -4,7 +4,6 @@ import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import pl.lodz.p.it.zzpj.entity.thesis.Article;
 import pl.lodz.p.it.zzpj.entity.questionnaire.Questionnaire;
 import pl.lodz.p.it.zzpj.service.auth.validator.Email;
 import pl.lodz.p.it.zzpj.service.auth.validator.Firstname;
@@ -103,6 +102,7 @@ public class Account implements UserDetails {
     }
 
     @ToString.Exclude
-    @OneToMany(mappedBy = "account", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @OneToMany(mappedBy = "account",
+            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private Set<Questionnaire> questionnaires = new HashSet<>();
 }

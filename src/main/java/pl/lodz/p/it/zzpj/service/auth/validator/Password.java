@@ -11,9 +11,11 @@ import java.lang.annotation.Target;
 @Constraint(validatedBy = {})
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
-@Size(min=8, max=64, message = "Password does not match size requirements")
+@Size(min = 8, max = 64, message = "validation.password.size")
 public @interface Password {
-    String message() default "Password is invalid";
+    String message() default "validation.password.size";
+
     Class<?>[] groups() default {};
+
     Class<? extends Payload>[] payload() default {};
 }

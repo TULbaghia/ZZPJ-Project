@@ -12,7 +12,6 @@ import pl.lodz.p.it.zzpj.service.auth.dto.RegisterAccountDto;
 import pl.lodz.p.it.zzpj.service.auth.manager.RegistrationService;
 
 import javax.validation.Valid;
-import javax.ws.rs.core.MediaType;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,15 +23,10 @@ public class RegistrationController {
 
     private final RegistrationService registrationService;
 
-    @PostMapping(produces = MediaType.APPLICATION_JSON)
-    public ResponseEntity register(@RequestBody @Valid RegisterAccountDto request) {
-        try {
+    @PostMapping
+    public ResponseEntity register(@RequestBody @Valid RegisterAccountDto request) throws RegistrationException {
             String confirmationToken = registrationService.register(request);
             return ResponseEntity.status(HttpStatus.OK).body(confirmationToken);
-        } catch (RegistrationException e) {
-            log.warning(e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
     }
 
     @GetMapping(path = "confirm")
@@ -49,6 +43,16 @@ public class RegistrationController {
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
         });
+        return errors;
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler({IllegalStateException.class, RegistrationException.class})
+    public Map<String, String> handleIllegalStateExceptions(Exception ex) {
+        Map<String, String> errors = new HashMap<>();
+        String cause = ex.getClass().getName();
+        String errorMessage = ex.getMessage();
+        errors.put(cause, errorMessage);
         return errors;
     }
 }

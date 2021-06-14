@@ -12,10 +12,10 @@ import java.lang.annotation.Target;
 @Constraint(validatedBy = {})
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
-@Size(min = 2, max = 31, message = "Lastname does not match size requirements")
-@Pattern(regexp = RegularExpression.LASTNAME, message = "Lastname does not match pattern requirements")
+@Size(min = 2, max = 31, message = "validation.lastname.size")
+@Pattern(regexp = RegularExpression.LASTNAME, message = "validation.lastname.pattern")
 public @interface Lastname {
-    String message() default "Lastname is invalid";
+    String message() default "validation.lastname.pattern";
 
     Class<?>[] groups() default {};
 
