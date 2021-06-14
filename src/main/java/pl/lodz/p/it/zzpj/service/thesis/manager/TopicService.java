@@ -1,6 +1,7 @@
 package pl.lodz.p.it.zzpj.service.thesis.manager;
 
 import lombok.AllArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -8,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.lodz.p.it.zzpj.entity.thesis.Topic;
 import pl.lodz.p.it.zzpj.exception.AppBaseException;
 import pl.lodz.p.it.zzpj.exception.NoRecordsException;
+import pl.lodz.p.it.zzpj.exception.TopicException;
 import pl.lodz.p.it.zzpj.service.thesis.repository.TopicRepository;
 
 import java.util.List;
@@ -15,14 +17,18 @@ import java.util.Set;
 
 @Service
 @AllArgsConstructor
-@Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED, rollbackFor = AppBaseException.class)
+@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED, rollbackFor = AppBaseException.class)
 public class TopicService {
 
     private final TopicRepository topicRepository;
 
-    public Topic addTopic(String name) {
+    public Topic addTopic(String name) throws TopicException {
         Topic topic = new Topic(name);
-        return topicRepository.save(topic);
+        try {
+            return topicRepository.save(topic);
+        } catch (DataIntegrityViolationException e) {
+            throw TopicException.topicAlreadyExists(e);
+        }
     }
 
     public Topic getTopic(Long id) throws NoRecordsException {

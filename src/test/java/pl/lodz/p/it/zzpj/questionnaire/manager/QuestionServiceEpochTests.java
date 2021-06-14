@@ -1,4 +1,4 @@
-package pl.lodz.p.it.zzpj.thesis.manager;
+package pl.lodz.p.it.zzpj.questionnaire.manager;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Order;
@@ -12,7 +12,7 @@ import pl.lodz.p.it.zzpj.service.questionnaire.manager.QuestionService;
 @SpringBootTest
 @Sql(scripts = {"classpath:drop_all.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 @Sql(scripts = {"classpath:init_question_service.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-public class QuestionService_EpochTests {
+public class QuestionServiceEpochTests {
 
     @Autowired
     private QuestionService questionService;

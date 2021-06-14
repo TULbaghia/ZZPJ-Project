@@ -14,6 +14,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import pl.lodz.p.it.zzpj.exception.ApiException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -30,6 +31,10 @@ public class TranslationApi {
     private final RestTemplate restTemplate;
 
     public List<String> translateWord(List<String> words) throws ApiException {
+        if(words.isEmpty()) {
+            return new ArrayList<>();
+        }
+
         var requestBody = requestUrl(words);
 
         return StreamSupport

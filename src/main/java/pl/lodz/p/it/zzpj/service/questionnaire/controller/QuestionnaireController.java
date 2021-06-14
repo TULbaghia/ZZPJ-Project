@@ -20,9 +20,9 @@ public class QuestionnaireController {
 
     private final QuestionnaireService questionnaireService;
 
-    @GetMapping(path = "{topicId}")
+    @PostMapping(path = "{topicId}")
     @ResponseBody
-    public QuestionnaireDto createQuestionnaireForTopic(@NotNull @PathVariable Long topicId) throws NoRecordsException {
+    public QuestionnaireDto createQuestionnaireForTopic(@NotNull @PathVariable Long topicId) throws AppBaseException {
         return questionnaireService.getQuestions(topicId);
     }
 

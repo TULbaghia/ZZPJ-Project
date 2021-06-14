@@ -52,4 +52,8 @@ public class Article {
             joinColumns = @JoinColumn(name = "article_id"),
             inverseJoinColumns = @JoinColumn(name = "topic_id"))
     private Set<Topic> topicList = new HashSet<>();
+
+    @ToString.Exclude
+    @OneToMany(mappedBy = "article", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ArticleWord> articleWordsList = new HashSet<>();
 }

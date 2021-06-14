@@ -37,7 +37,7 @@ public class ArticleController {
     @ResponseBody
     public void insertArticleByTopic(@NotNull @PathVariable @Subject String topic, @PathVariable int start, @PathVariable int pagination) throws AppBaseException {
         var articleDtoList = articleService.createFromTopic(topic, start, pagination);
-        articleDtoList.parallelStream().forEach(x -> {
+        articleDtoList.forEach(x -> {
             try {
                 articleService.createFromDoi(x);
             } catch (DataIntegrityViolationException | AppBaseException e) {

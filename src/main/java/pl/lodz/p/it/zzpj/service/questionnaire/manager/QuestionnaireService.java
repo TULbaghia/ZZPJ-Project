@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.lodz.p.it.zzpj.entity.questionnaire.Questionnaire;
 import pl.lodz.p.it.zzpj.entity.questionnaire.QuestionnaireQuestion;
 import pl.lodz.p.it.zzpj.entity.user.Account;
+import pl.lodz.p.it.zzpj.entity.user.AccountRole;
 import pl.lodz.p.it.zzpj.exception.*;
 import pl.lodz.p.it.zzpj.service.auth.repository.AccountRepository;
 import pl.lodz.p.it.zzpj.service.questionnaire.dto.QuestionnaireDto;
@@ -39,14 +40,18 @@ public class QuestionnaireService {
     private final QuestionnaireRepository questionnaireRepository;
     private final AccountRepository accountRepository;
 
-    public QuestionnaireDto getQuestions(Long topicId) throws NoRecordsException {
+    public QuestionnaireDto getQuestions(Long topicId) throws AppBaseException {
+        String emailPrincipal = getEmailPrincipal();
+        Account account = accountRepository.findByEmail(emailPrincipal).orElseThrow();
+
+        if(account.getQuestionnaires().stream().anyMatch(x -> !x.isSolved())) {
+            throw QuestionnaireException.lastQuestionnaireNotSolved();
+        }
+
         var topArticles = questionService.getArticlesConnectedWithTopic(topicId, EPOCHS_NUMBER);
 
         var wordIdsWithEpochPriority = questionService.getWordsIdsByArticles(topArticles);
 
-        String emailPrincipal = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-
-        Account account = accountRepository.findByEmail(emailPrincipal).orElseThrow();
 
         Questionnaire questionnaire = new Questionnaire(account);
         List<QuestionnaireQuestion> initMe = getQuestionnaireQuestions(wordIdsWithEpochPriority, questionnaire);
@@ -58,7 +63,11 @@ public class QuestionnaireService {
         return IQuestionnaireMapper.INSTANCE.toPlainDto(questionnaireDto);
     }
 
-    private List<QuestionnaireQuestion> getQuestionnaireQuestions(List<Set<Long>> wordIdsWithEpochPriority, Questionnaire questionnaire) {
+    public String getEmailPrincipal() {
+        return SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+    }
+
+    protected List<QuestionnaireQuestion> getQuestionnaireQuestions(List<Set<Long>> wordIdsWithEpochPriority, Questionnaire questionnaire) {
         List<QuestionnaireQuestion> initMe =
             wordIdsWithEpochPriority
                 .stream()
@@ -70,10 +79,7 @@ public class QuestionnaireService {
                 .flatMap(Collection::stream)
                 .limit(RETURN_SIZE)
                 .map(wordService::getWord)
-                .map(word -> {
-                    Long id = word.getId();
-                    return new QuestionnaireQuestion(questionnaire, word);
-                })
+                .map(word -> new QuestionnaireQuestion(questionnaire, word))
                 .collect(Collectors.toList());
 
         questionRepository.saveAllAndFlush(initMe);
@@ -81,20 +87,38 @@ public class QuestionnaireService {
     }
 
     public Set<Long> getQuestionnaireForUser() {
-        String emailPrincipal = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        String emailPrincipal = getEmailPrincipal();
 
         Account account = accountRepository.findByEmail(emailPrincipal).orElseThrow();
         return questionnaireRepository.findByAccount(account);
     }
 
     public QuestionnaireDto getQuestionnaire(Long questionnaireId) throws AppBaseException {
-        var questionnaire = questionnaireRepository.findById(questionnaireId);
+        String emailPrincipal = getEmailPrincipal();
+        Account account = accountRepository.findByEmail(emailPrincipal).orElseThrow();
+        var questionnaire = questionnaireRepository.findById(questionnaireId)
+                .orElseThrow(NoRecordsException::new);
 
-        return IQuestionnaireMapper.INSTANCE.toDto(questionnaire.orElseThrow(NoRecordsException::new));
+        if(account.getAccountRole().equals(AccountRole.USER)
+                && !questionnaire.getAccount().equals(account)) {
+            throw new AccessDeniedException("exception.access.denied");
+        }
+
+        QuestionnaireDto qDto = IQuestionnaireMapper.INSTANCE.toDto(questionnaire);
+        if (qDto.isSolved()) {
+            qDto.setScore((int) questionnaire.getQuestionnaireQuestions()
+                    .stream()
+                    .map(QuestionnaireQuestion::isCorrect)
+                    .filter(x -> x)
+                    .count());
+            return qDto;
+        }
+
+        return IQuestionnaireMapper.INSTANCE.toPlainDto(qDto);
     }
 
     public QuestionnaireDto solveQuestionnaire(QuestionnaireDto questionnaireDto) throws AppBaseException {
-        String emailPrincipal = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        String emailPrincipal = getEmailPrincipal();
 
         Account account = accountRepository.findByEmail(emailPrincipal).orElseThrow();
         Questionnaire questionnaire = questionnaireRepository.getById(questionnaireDto.getId());

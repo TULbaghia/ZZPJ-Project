@@ -1,4 +1,4 @@
-package pl.lodz.p.it.zzpj.thesis.manager;
+package pl.lodz.p.it.zzpj.questionnaire.manager;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Order;
@@ -16,7 +16,7 @@ import java.util.stream.LongStream;
 @SpringBootTest
 @Sql(scripts = {"classpath:drop_all.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 @Sql(scripts = {"classpath:init_question_service.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-public class QuestionService_AllowedWords {
+public class QuestionServiceAllowedWordsTests {
 
     @Autowired
     private QuestionService questionService;
